@@ -1,15 +1,16 @@
-// @ts-check
-import globals from 'globals';
-import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import { defineConfig, globalIgnores } from 'eslint/config';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import globals from 'globals';
+import type { ConfigArray } from 'typescript-eslint';
 
-export default defineConfig(
-  globalIgnores(['eslint.config.mjs', '**/*.spec.ts', '**/*.e2e-spec.ts']),
-  eslint.configs.recommended,
-  tseslint.configs.recommendedTypeChecked,
-  // eslintPluginPrettierRecommended,
+const __dirname = new URL('.', import.meta.url).pathname;
+
+const config: ConfigArray = tseslint.config(
+  {
+    ignores: ['eslint.config.ts'],
+  },
+  ...tseslint.configs.recommendedTypeChecked,
+  eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
@@ -19,7 +20,7 @@ export default defineConfig(
       sourceType: 'commonjs',
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: __dirname,
       },
     },
   },
@@ -31,3 +32,5 @@ export default defineConfig(
     },
   },
 );
+
+export default config;
