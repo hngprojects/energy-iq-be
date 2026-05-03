@@ -1,26 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import {
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-}
+import { Column, Entity, Index } from 'typeorm';
+import { AbstractBaseEntity } from '../../../database/entities/abstract-base.entity';
+import { UserRole } from '../../../common/enums';
 
 @Entity('users')
-export class User {
-  @ApiProperty({ format: 'uuid' })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class User extends AbstractBaseEntity {
   @ApiProperty({ example: 'user@example.com' })
   @Index({ unique: true })
   @Column({ type: 'varchar', length: 255, unique: true })
@@ -39,18 +24,11 @@ export class User {
   role: UserRole;
 
   @Exclude()
-  @Column({ type: 'varchar', length: 500, nullable: true, name: 'refresh_token_hash' })
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    name: 'refresh_token_hash',
+  })
   refreshTokenHash: string | null;
-
-  @ApiProperty()
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @ApiProperty()
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
-
-  @Exclude()
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt: Date | null;
 }

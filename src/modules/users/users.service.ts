@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { SYS_MSG } from '../../common/constants/sys-msg';
 import { UserModelAction } from './actions/user.action';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from './dto/pagination.dto';
@@ -12,7 +13,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
 const BCRYPT_ROUNDS = 10;
-const NO_TRANSACTION = { transactionOptions: { useTransaction: false as const } };
+const NO_TRANSACTION = {
+  transactionOptions: { useTransaction: false as const },
+};
 
 @Injectable()
 export class UsersService {
@@ -20,9 +23,7 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const existing = await this.userModelAction.findByEmail(dto.email);
-    if (existing) {
-      throw new ConflictException('Email already in use');
-    }
+    if (existing) throw new ConflictException(SYS_MSG.CONFLICT);
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     return this.userModelAction.create({
@@ -47,7 +48,7 @@ export class UsersService {
     const user = await this.userModelAction.get({
       identifierOptions: { id },
     });
-    if (!user) throw new NotFoundException(`User ${id} not found`);
+    if (!user) throw new NotFoundException(SYS_MSG.NOT_FOUND);
     return user;
   }
 
@@ -59,9 +60,8 @@ export class UsersService {
     await this.findOne(id);
 
     const payload: Partial<User> = { ...dto };
-    if (dto.password) {
+    if (dto.password)
       payload.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
-    }
 
     const updated = await this.userModelAction.update({
       ...NO_TRANSACTION,
@@ -69,7 +69,7 @@ export class UsersService {
       updatePayload: payload,
     });
     if (!updated) {
-      throw new InternalServerErrorException('Failed to update user');
+      throw new InternalServerErrorException(SYS_MSG.INTERNAL_SERVER_ERROR);
     }
     return updated;
   }

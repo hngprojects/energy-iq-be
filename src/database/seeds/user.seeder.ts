@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
-import { User, UserRole } from '../../modules/users/entities/user.entity';
+import { User } from '../../modules/users/entities/user.entity';
+import { UserRole } from '../../common/enums';
 import { Seeder } from './seeder.interface';
 
 export const userSeeder: Seeder = {
@@ -11,7 +12,6 @@ export const userSeeder: Seeder = {
     const adminEmail = 'admin@example.com';
     const existing = await repository.findOne({ where: { email: adminEmail } });
     if (existing) {
-      // eslint-disable-next-line no-console
       console.log(`[UserSeeder] ${adminEmail} already exists — skipping`);
       return;
     }
@@ -23,7 +23,9 @@ export const userSeeder: Seeder = {
       role: UserRole.ADMIN,
     });
     await repository.save(admin);
-    // eslint-disable-next-line no-console
-    console.log(`[UserSeeder] created admin user → ${adminEmail} / Admin@123456`);
+
+    console.log(
+      `[UserSeeder] created admin user → ${adminEmail} / Admin@123456`,
+    );
   },
 };

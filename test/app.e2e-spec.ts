@@ -2,17 +2,19 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { TransformInterceptor } from '../src/common/interceptors/transform.interceptor';
+import { HealthModule } from '../src/modules/health/health.module';
 
 describe('Health (e2e)', () => {
   let app: INestApplication<App>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [HealthModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalInterceptors(new TransformInterceptor());
     await app.init();
   });
 
@@ -21,12 +23,25 @@ describe('Health (e2e)', () => {
       .get('/health')
       .expect(200)
       .expect((res) => {
-        expect(res.body.success).toBe(true);
-        expect(res.body.data.status).toBe('ok');
+        const body = res.body as {
+          success: boolean;
+          message: string;
+          data: { status: string };
+          meta: { timestamp: string };
+        };
+
+        expect(body.success).toBe(true);
+        expect(body.message).toBe('Resource retrieved successfully');
+        expect(body.data.status).toBe('ok');
+        expect(body.meta.timestamp).toBeDefined();
       });
   });
 
-  afterEach(async () => {
+  it('GET /api/v1/health → 404 (v1 health not versioned)', () => {
+    return request(app.getHttpServer()).get('/api/v1/health').expect(404);
+  });
+
+  afterAll(async () => {
     await app.close();
   });
 });

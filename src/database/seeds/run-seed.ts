@@ -9,7 +9,7 @@ async function run() {
   await dataSource.initialize();
   console.log('Running seeders…');
   for (const seeder of seeders) {
-    console.log(`→ ${seeder.name}`);
+    console.log(`-> ${seeder.name}`);
     await seeder.run(dataSource);
   }
   await dataSource.destroy();

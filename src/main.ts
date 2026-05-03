@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -6,6 +6,8 @@ import compression from 'compression';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { env } from './config/env';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,17 +20,27 @@ async function bootstrap() {
     origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(','),
     credentials: true,
   });
-  app.setGlobalPrefix('api', { exclude: ['health'] });
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector)),
-  );
+  app.enableVersioning({
+    type: VersioningType.URI,
+    prefix: 'v',
+    defaultVersion: '1',
+  });
+  app.setGlobalPrefix('api');
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableShutdownHooks();
 
   if (env.SWAGGER_ENABLED) {
+    const packageJson = JSON.parse(
+      readFileSync(resolve(process.cwd(), 'package.json'), 'utf-8'),
+    ) as { version: string };
     const config = new DocumentBuilder()
-      .setTitle('NestJS Starter')
-      .setDescription('REST API documentation')
-      .setVersion('1.0.0')
+      .setTitle('Energy IQ API')
+      .setDescription(
+        'AI-powered energy management platform API for Nigerian SMEs and African businesses',
+      )
+      .setVersion(packageJson.version)
+      .addServer(`http://localhost:${env.PORT}`, 'Local Development')
+      .addServer('https://api.energyiq.example.com', 'Production')
       .addBearerAuth(
         { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
         'JWT',
@@ -36,17 +48,29 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document, {
-      swaggerOptions: { persistAuthorization: true },
+      swaggerOptions: {
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        deepLinking: true,
+        filter: true,
+        tryItOutEnabled: false,
+      },
     });
   }
 
-  await app.listen(env.PORT);
+  await app.listen(env.PORT, env.HOST);
 
   const logger = new Logger('Bootstrap');
-  logger.log(`Application running on http://localhost:${env.PORT}`);
-  if (env.SWAGGER_ENABLED) {
-    logger.log(`Swagger docs at http://localhost:${env.PORT}/docs`);
-  }
+  logger.log({
+    message: 'Energy IQ API is running on http://localhost:' + env.PORT,
+    port: env.PORT,
+    host: env.HOST,
+    environment: env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  });
+
+  if (env.SWAGGER_ENABLED)
+    logger.log(`Swagger docs: http://localhost:${env.PORT}/docs`);
 }
 
 void bootstrap();

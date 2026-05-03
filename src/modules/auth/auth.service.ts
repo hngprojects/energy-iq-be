@@ -1,12 +1,11 @@
-import {
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { StringValue } from 'ms';
+import { SYS_MSG } from '../../common/constants/sys-msg';
 import { env } from '../../config/env';
 import { User } from '../users/entities/user.entity';
+import { PublicUser } from '../users/types/public-user.type';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -18,7 +17,7 @@ export interface AuthTokens {
 }
 
 export interface AuthResponse extends AuthTokens {
-  user: Omit<User, 'password' | 'refreshTokenHash' | 'deletedAt'>;
+  user: PublicUser;
 }
 
 @Injectable()
@@ -39,10 +38,10 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     const user = await this.usersService.findByEmail(dto.email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
     const valid = await bcrypt.compare(dto.password, user.password);
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
+    if (!valid) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
     return this.issueTokens(user);
   }
@@ -54,16 +53,17 @@ export class AuthService {
         secret: env.JWT_REFRESH_SECRET,
       });
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException(SYS_MSG.INVALID_REFRESH_TOKEN);
     }
 
     const user = await this.usersService.findOne(payload.sub);
     if (!user.refreshTokenHash) {
-      throw new UnauthorizedException('Refresh token has been revoked');
+      throw new UnauthorizedException(SYS_MSG.INVALID_REFRESH_TOKEN);
     }
 
     const matches = await bcrypt.compare(refreshToken, user.refreshTokenHash);
-    if (!matches) throw new UnauthorizedException('Invalid refresh token');
+    if (!matches)
+      throw new UnauthorizedException(SYS_MSG.INVALID_REFRESH_TOKEN);
 
     const tokens = await this.signTokens(user);
     await this.persistRefreshToken(user.id, tokens.refreshToken);
@@ -82,14 +82,7 @@ export class AuthService {
     const tokens = await this.signTokens(user);
     await this.persistRefreshToken(user.id, tokens.refreshToken);
 
-    const {
-      password: _password,
-      refreshTokenHash: _hash,
-      deletedAt: _deletedAt,
-      ...safeUser
-    } = user;
-
-    return { ...tokens, user: safeUser };
+    return { ...tokens, user: this.toPublicUser(user) };
   }
 
   private async signTokens(user: User): Promise<AuthTokens> {
@@ -113,5 +106,16 @@ export class AuthService {
   ): Promise<void> {
     const hash = await bcrypt.hash(refreshToken, 10);
     await this.usersService.setRefreshTokenHash(userId, hash);
+  }
+
+  private toPublicUser(user: User): PublicUser {
+    return {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 }
