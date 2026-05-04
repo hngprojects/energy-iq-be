@@ -1,3 +1,17 @@
 #!/bin/sh
-echo "🌀 Running validation before push..."
+set -e
+
+# Block pushes that target protected remote branches.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main|refs/heads/staging)
+      branch="${remote_ref#refs/heads/}"
+      echo "Cannot push directly to ${branch}."
+      echo "Push to your working branch and open a PR to dev branch instead."
+      exit 1
+      ;;
+  esac
+done
+
+echo "Running validation before push..."
 pnpm --silent run validate
