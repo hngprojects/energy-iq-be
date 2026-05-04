@@ -1,2 +1,3 @@
 #!/bin/sh
+echo "🌀 Running validation before push..."
 pnpm --silent run validate
