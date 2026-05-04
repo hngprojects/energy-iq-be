@@ -23,6 +23,16 @@ EnergyIQ is expected to stay production-ready. Contributions should be small, te
 
 `pnpm validate` runs linting, tests, and the build in one command. Do not skip it before pushing.
 
+## Git Hooks
+
+This repository uses Husky hooks to enforce quality checks locally:
+
+- `pre-commit` runs `lint-staged` on staged TypeScript files.
+- `commit-msg` runs `commitlint` against the commit message.
+- `pre-push` runs `pnpm validate` before code leaves your local branch.
+
+If you clone the repository normally and run `pnpm install`, Husky is installed automatically through the `prepare` script in `package.json`. You should not need to configure the hooks again by hand on each machine, unless dependency install scripts were skipped or disabled.
+
 ## Codebase Map
 
 This repository is a NestJS API with a small but opinionated structure.

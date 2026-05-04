@@ -92,6 +92,16 @@ The application validates configuration at startup and fails fast on missing or 
 | `pnpm test:e2e` | Run end-to-end tests |
 | `pnpm validate` | Run lint, tests, and build in one command |
 
+## Git Hooks
+
+This repository uses Husky to run checks automatically at the Git stage level:
+
+- `pre-commit` runs `lint-staged` on staged `*.ts` files so formatting and lint fixes happen before the commit is created.
+- `commit-msg` runs `commitlint` to enforce conventional commit messages.
+- `pre-push` runs `pnpm validate` to block pushes when lint, tests, e2e, or build fail.
+
+After cloning the repository, run `pnpm install` once. The `prepare` script in `package.json` installs the hooks automatically during dependency installation, so you do not need to set Husky up manually in each clone unless install scripts are skipped.
+
 ### Database
 | Script | Purpose |
 |---|---|

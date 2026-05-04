@@ -7,7 +7,7 @@ const __dirname = new URL('.', import.meta.url).pathname;
 
 const config: ConfigArray = tseslint.config(
   {
-    ignores: ['eslint.config.ts'],
+    ignores: ['eslint.config.ts', 'commitlint.config.ts'],
   },
   ...tseslint.configs.recommendedTypeChecked,
   eslintPluginPrettierRecommended,
