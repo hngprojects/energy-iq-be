@@ -16,7 +16,7 @@ export class User extends AbstractBaseEntity {
   password: string;
 
   @ApiProperty()
-  @Column({ type: 'varchar', length: 255, name: 'full_name' })
+  @Column({ type: 'varchar', length: 255 })
   fullName: string;
 
   @ApiProperty({ enum: UserRole, default: UserRole.USER })
@@ -28,7 +28,6 @@ export class User extends AbstractBaseEntity {
     type: 'varchar',
     length: 500,
     nullable: true,
-    name: 'refresh_token_hash',
   })
   refreshTokenHash: string | null;
 }

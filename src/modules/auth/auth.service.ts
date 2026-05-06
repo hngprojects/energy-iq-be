@@ -1,15 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { StringValue } from 'ms';
 import { SYS_MSG } from '../../common/constants/sys-msg';
-import { env } from '../../config/env';
 import { User } from '../users/entities/user.entity';
 import { PublicUser } from '../users/types/public-user.type';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { type ConfigType } from '@nestjs/config';
+import { jwtConfig } from '../../config/jwt.config';
 
 export interface AuthTokens {
   accessToken: string;
@@ -23,6 +24,8 @@ export interface AuthResponse extends AuthTokens {
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(jwtConfig.KEY)
+    private readonly jwtCfg: ConfigType<typeof jwtConfig>,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
@@ -50,16 +53,15 @@ export class AuthService {
     let payload: JwtPayload;
     try {
       payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, {
-        secret: env.JWT_REFRESH_SECRET,
+        secret: this.jwtCfg.refreshSecret,
       });
     } catch {
       throw new UnauthorizedException(SYS_MSG.INVALID_REFRESH_TOKEN);
     }
 
     const user = await this.usersService.findOne(payload.sub);
-    if (!user.refreshTokenHash) {
+    if (!user.refreshTokenHash)
       throw new UnauthorizedException(SYS_MSG.INVALID_REFRESH_TOKEN);
-    }
 
     const matches = await bcrypt.compare(refreshToken, user.refreshTokenHash);
     if (!matches)
@@ -89,12 +91,12 @@ export class AuthService {
     const payload: JwtPayload = { sub: user.id, email: user.email };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: env.JWT_ACCESS_SECRET,
-        expiresIn: env.JWT_ACCESS_EXPIRES_IN as StringValue,
+        secret: this.jwtCfg.accessSecret,
+        expiresIn: this.jwtCfg.accessExpiresIn as StringValue,
       }),
       this.jwtService.signAsync(payload, {
-        secret: env.JWT_REFRESH_SECRET,
-        expiresIn: env.JWT_REFRESH_EXPIRES_IN as StringValue,
+        secret: this.jwtCfg.refreshSecret,
+        expiresIn: this.jwtCfg.refreshExpiresIn as StringValue,
       }),
     ]);
     return { accessToken, refreshToken };
