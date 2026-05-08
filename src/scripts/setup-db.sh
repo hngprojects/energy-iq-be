@@ -15,7 +15,7 @@ read -r -p "Allow remote connections? [no]: " ALLOW_REMOTE
 ALLOW_REMOTE=${ALLOW_REMOTE:-no}
 
 # ---- Resolve Postgres config paths (Ubuntu/Debian) ----
-PG_VERSION="$(ls /etc/postgresql | sort -V | tail -n 1)"
+PG_VERSION="$(find /etc/postgresql -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V | tail -n 1)"
 PG_CONF_DIR="/etc/postgresql/${PG_VERSION}/main"
 PG_CONF="${PG_CONF_DIR}/postgresql.conf"
 PG_HBA="${PG_CONF_DIR}/pg_hba.conf"
@@ -23,9 +23,16 @@ PG_HBA="${PG_CONF_DIR}/pg_hba.conf"
 echo "Using Postgres ${PG_VERSION} config in ${PG_CONF_DIR}"
 
 # ---- Create role and database ----
-sudo -u postgres psql <<SQL
-CREATE ROLE ${DB_USER} LOGIN PASSWORD '${DB_PASSWORD}';
-CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};
+sudo -u postgres psql -v ON_ERROR_STOP=1 \
+  -v db_user="${DB_USER}" -v db_name="${DB_NAME}" -v db_password="${DB_PASSWORD}" <<'SQL'
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'db_user') THEN
+    EXECUTE format('CREATE ROLE %I LOGIN PASSWORD %L', :'db_user', :'db_password');
+  END IF;
+END $$;
+SELECT 'CREATE DATABASE ' || quote_ident(:'db_name') || ' OWNER ' || quote_ident(:'db_user')
+WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'db_name')\gexec
 SQL
 
 # ---- Extensions ----
@@ -55,4 +62,4 @@ fi
 # ---- Reload Postgres ----
 sudo systemctl reload postgresql
 
-echo "Done. DB=${DB_NAME}, USER=${DB_USER}, EXTENSIONS=${ENABLE_EXTENSIONS}, REMOTE=${ALLOW_REMOTE}"
+echo "Done. DB=${DB_NAME}, USER=${DB_USER}, EXTENSIONS=uuid-ossp,citext, REMOTE=${ALLOW_REMOTE}"

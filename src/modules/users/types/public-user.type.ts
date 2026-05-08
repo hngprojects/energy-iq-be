@@ -7,16 +7,8 @@ export type UserResponse = Omit<
 
 export type PublicUser = Pick<
   UserResponse,
-  | 'id'
-  | 'email'
-  | 'firstName'
-  | 'lastName'
-  | 'role'
-  | 'lastLoginAt'
-  | 'emailVerified'
-  | 'createdAt'
-  | 'updatedAt'
+  'id' | 'email' | 'firstName' | 'lastName' | 'role' | 'createdAt' | 'updatedAt'
 > & {
-  lastLoginAt: UserResponse['lastLoginAt'] | null;
-  emailVerified: UserResponse['emailVerified'] | null;
+  lastLoginAt: Date | undefined;
+  emailVerified: boolean;
 };
