@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { noTransaction } from '../../common/constants/transaction-options';
 import { SYS_MSG } from '../../common/constants/sys-msg';
 import { UserModelAction } from './actions/user.action';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,9 +14,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
 const BCRYPT_ROUNDS = 10;
-const NO_TRANSACTION = {
-  transactionOptions: { useTransaction: false as const },
-};
 
 @Injectable()
 export class UsersService {
@@ -27,7 +25,7 @@ export class UsersService {
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     return this.userModelAction.create({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
       createPayload: {
         email: dto.email,
         password: passwordHash,
@@ -64,7 +62,7 @@ export class UsersService {
       payload.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
     const updated = await this.userModelAction.update({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
       identifierOptions: { id },
       updatePayload: payload,
     });
@@ -77,14 +75,14 @@ export class UsersService {
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.userModelAction.delete({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
       identifierOptions: { id },
     });
   }
 
   async setRefreshTokenHash(id: string, hash: string | null): Promise<void> {
     await this.userModelAction.update({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
       identifierOptions: { id },
       updatePayload: { refreshTokenHash: hash },
     });

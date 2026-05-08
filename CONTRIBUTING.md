@@ -29,9 +29,11 @@ This repository uses Husky hooks to enforce quality checks locally:
 
 - `pre-commit` runs `lint-staged` on staged TypeScript files.
 - `commit-msg` runs `commitlint` against the commit message.
-- `pre-push` runs `pnpm validate` before code leaves your local branch.
+- `pre-push` blocks direct pushes to `main` and `staging`, and runs `pnpm validate` on other branches.
 
 If you clone the repository normally and run `pnpm install`, Husky is installed automatically through the `prepare` script in `package.json`. You should not need to configure the hooks again by hand on each machine, unless dependency install scripts were skipped or disabled.
+
+**Note:** The client-side pre-push hook is a convenience check. It can be bypassed with `git push --no-verify`. The true protection comes from GitHub branch protection rules on the server side (when your organization upgrades to GitHub Team or Enterprise).
 
 ## Codebase Map
 
