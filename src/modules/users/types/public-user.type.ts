@@ -1,16 +1,14 @@
-import { UserRole } from '../../../common/enums';
+import { User } from '../entities/user.entity';
 
-// export type PublicUser = Omit<
-//   User,
-//   'passwordHash' | 'refreshTokenHash' | 'deletedAt' | 'googleId'
-// >;
+export type UserResponse = Omit<
+  User,
+  'passwordHash' | 'refreshTokenHash' | 'deletedAt' | 'googleId'
+>;
 
-export type PartialUser = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
+export type PublicUser = Pick<
+  UserResponse,
+  'id' | 'email' | 'firstName' | 'lastName' | 'role' | 'createdAt' | 'updatedAt'
+> & {
+  lastLoginAt: Date | undefined;
+  emailVerified: boolean;
 };
