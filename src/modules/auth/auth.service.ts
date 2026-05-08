@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import type { StringValue } from 'ms';
 import { SYS_MSG } from '../../common/constants/sys-msg';
 import { User } from '../users/entities/user.entity';
-import { PublicUser } from '../users/types/public-user.type';
+import { PartialUser } from '../users/types/public-user.type';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -18,7 +18,7 @@ export interface AuthTokens {
 }
 
 export interface AuthResponse extends AuthTokens {
-  user: PublicUser;
+  user: PartialUser;
 }
 
 @Injectable()
@@ -30,20 +30,21 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<AuthResponse> {
+  async register(dto: RegisterDto): Promise<PartialUser> {
     const user = await this.usersService.create({
       email: dto.email,
       password: dto.password,
-      fullName: dto.fullName,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
     });
-    return this.issueTokens(user);
+    return this.toPublicUser(user);
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
-    const valid = await bcrypt.compare(dto.password, user.password);
+    const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
     return this.issueTokens(user);
@@ -110,11 +111,12 @@ export class AuthService {
     await this.usersService.setRefreshTokenHash(userId, hash);
   }
 
-  private toPublicUser(user: User): PublicUser {
+  private toPublicUser(user: User): PartialUser {
     return {
       id: user.id,
       email: user.email,
-      fullName: user.fullName,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
