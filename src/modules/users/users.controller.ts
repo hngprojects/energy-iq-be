@@ -25,6 +25,7 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: 'List users (paginated)' })
+  @UseGuards(JwtAuthGuard)
   findAll(@Query() pagination: PaginationDto) {
     return this.usersService.findAll(pagination);
   }
