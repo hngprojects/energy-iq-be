@@ -118,8 +118,8 @@ export class AuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
-      lastLoginAt: user.lastLoginAt,
-      emailVerified: user.emailVerified,
+      lastLoginAt: user.lastLoginAt ?? undefined,
+      emailVerified: user.emailVerified ?? false,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

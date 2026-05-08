@@ -16,4 +16,7 @@ export type PublicUser = Pick<
   | 'emailVerified'
   | 'createdAt'
   | 'updatedAt'
->;
+> & {
+  lastLoginAt: UserResponse['lastLoginAt'] | null;
+  emailVerified: UserResponse['emailVerified'] | null;
+};

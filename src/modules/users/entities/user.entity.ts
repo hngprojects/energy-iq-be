@@ -1,12 +1,11 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { AbstractBaseEntity } from '../../../database/entities/abstract-base.entity';
 import { UserRole } from '../../../common/enums';
 
 @Entity('users')
 export class User extends AbstractBaseEntity {
-  @Index({ unique: true })
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: 'citext', unique: true })
   email: string;
 
   @Exclude()
@@ -22,7 +21,7 @@ export class User extends AbstractBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   googleId?: string;
 
-  @Column({ type: 'boolean', nullable: true, default: false })
+  @Column({ type: 'boolean', default: false })
   emailVerified: boolean;
 
   @Column({ type: 'varchar', length: 30, nullable: true })
@@ -31,11 +30,11 @@ export class User extends AbstractBaseEntity {
   @Column({ type: 'smallint', nullable: true })
   onboardingStep?: number;
 
-  @Column({ type: 'boolean', nullable: true })
-  onboardingComplete?: boolean;
+  @Column({ type: 'boolean', default: false })
+  onboardingComplete: boolean;
 
-  @Column({ type: 'boolean', nullable: true, default: false })
-  isActive?: boolean;
+  @Column({ type: 'boolean', default: false })
+  isActive: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
   lastLoginAt?: Date;
