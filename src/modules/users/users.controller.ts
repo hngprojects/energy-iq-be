@@ -8,26 +8,20 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
-  Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create a user' })
-  create(@Body() dto: CreateUserDto) {
-    return this.usersService.create(dto);
-  }
 
   @Get()
   @ApiOperation({ summary: 'List users (paginated)' })
@@ -37,12 +31,14 @@ export class UsersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by id' })
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user' })
+  @UseGuards(JwtAuthGuard)
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
@@ -50,6 +46,7 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a user' })
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }

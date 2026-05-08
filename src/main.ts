@@ -41,10 +41,7 @@ async function bootstrap() {
       .setVersion(packageJson.version)
       .addServer(`http://localhost:${env.PORT}`, 'Local Development')
       .addServer('https://api.energyiq.example.com', 'Production')
-      .addBearerAuth(
-        { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-        'JWT',
-      )
+      .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document, {

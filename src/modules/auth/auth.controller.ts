@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -14,6 +15,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -44,17 +46,19 @@ export class AuthController {
     return this.authService.refresh(dto.refreshToken);
   }
 
-  @ApiBearerAuth()
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Revoke the current refresh token' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   logout(@CurrentUser('sub') userId: string) {
     return this.authService.logout(userId);
   }
 
-  @ApiBearerAuth()
   @Get('me')
   @ApiOperation({ summary: 'Return the current authenticated user' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   me(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.getProfile(user.sub);
   }

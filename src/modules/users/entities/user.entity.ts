@@ -13,11 +13,43 @@ export class User extends AbstractBaseEntity {
 
   @Exclude()
   @Column({ type: 'varchar', length: 255 })
-  password: string;
+  passwordHash: string;
 
   @ApiProperty()
   @Column({ type: 'varchar', length: 255 })
-  fullName: string;
+  firstName: string;
+
+  @ApiProperty()
+  @Column({ type: 'varchar', length: 255 })
+  lastName: string;
+
+  @ApiProperty()
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  googleId?: string;
+
+  @ApiProperty()
+  @Column({ type: 'boolean', nullable: true, default: false })
+  emailVerified: boolean;
+
+  @ApiProperty()
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  inverterBrand?: string;
+
+  @ApiProperty()
+  @Column({ type: 'smallint', nullable: true })
+  onboardingStep?: number;
+
+  @ApiProperty()
+  @Column({ type: 'boolean', nullable: true })
+  onboardingComplete?: boolean;
+
+  @ApiProperty()
+  @Column({ type: 'boolean', nullable: true, default: false })
+  isActive?: boolean;
+
+  @ApiProperty()
+  @Column({ type: 'timestamptz', nullable: true })
+  lastLoginAt?: Date;
 
   @ApiProperty({ enum: UserRole, default: UserRole.USER })
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })

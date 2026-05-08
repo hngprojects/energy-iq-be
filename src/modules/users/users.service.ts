@@ -28,8 +28,9 @@ export class UsersService {
       ...noTransaction(),
       createPayload: {
         email: dto.email,
-        password: passwordHash,
-        fullName: dto.fullName,
+        passwordHash: passwordHash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         role: dto.role,
       },
     });
@@ -58,8 +59,6 @@ export class UsersService {
     await this.findOne(id);
 
     const payload: Partial<User> = { ...dto };
-    if (dto.password)
-      payload.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
     const updated = await this.userModelAction.update({
       ...noTransaction(),
