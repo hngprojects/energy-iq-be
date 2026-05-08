@@ -11,6 +11,8 @@ import { RegisterDto } from './dto/register.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { type ConfigType } from '@nestjs/config';
 import { jwtConfig } from '../../config/jwt.config';
+import { EmailService } from '../email/email.service';
+import { appConfig } from '../../config/app.config';
 
 export interface AuthTokens {
   accessToken: string;
@@ -26,8 +28,11 @@ export class AuthService {
   constructor(
     @Inject(jwtConfig.KEY)
     private readonly jwtCfg: ConfigType<typeof jwtConfig>,
+    @Inject(appConfig.KEY)
+    private readonly appCfg: ConfigType<typeof appConfig>,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   async register(dto: RegisterDto): Promise<PublicUser> {
@@ -37,6 +42,14 @@ export class AuthService {
       firstName: dto.firstName,
       lastName: dto.lastName,
     });
+
+    await this.emailService.sendVerifyEmail(
+      user.email,
+      `${user.firstName} ${user.lastName}`,
+      '000000',
+      this.appCfg.clientUrl,
+    );
+
     return this.toPublicUser(user);
   }
 
@@ -46,6 +59,10 @@ export class AuthService {
 
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
+
+    if (!user.emailVerified) {
+      throw new UnauthorizedException(SYS_MSG.EMAIL_NOT_VERIFIED);
+    }
 
     return this.issueTokens(user);
   }

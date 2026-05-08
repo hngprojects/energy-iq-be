@@ -11,6 +11,7 @@ export const env = createEnv({
       .default('development'),
     PORT: z.coerce.number().int().positive().default(3000),
     HOST: z.string().default('localhost'),
+    CLIENT_URL: z.string().default('http://localhost:3000'),
 
     DATABASE_HOST: z.string().min(1),
     DATABASE_PORT: z.coerce.number().int().positive().default(5432),
@@ -29,6 +30,11 @@ export const env = createEnv({
       .union([z.boolean(), z.enum(['true', 'false'])])
       .default(false)
       .transform((v) => v === true || v === 'true'),
+
+    REDIS_HOST: z.string().default('localhost'),
+    REDIS_PORT: z.coerce.number().int().positive().default(6379),
+
+    RESEND_API_KEY: z.string().min(1),
 
     JWT_ACCESS_SECRET: z
       .string()

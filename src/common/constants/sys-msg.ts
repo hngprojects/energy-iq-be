@@ -16,4 +16,5 @@ export const SYS_MSG = {
   INVALID_CREDENTIALS: 'The provided email or password is incorrect',
   INVALID_REFRESH_TOKEN:
     'The refresh token is invalid, expired, or cannot be used',
+  EMAIL_NOT_VERIFIED: 'This user email is not verified',
 } as const;
