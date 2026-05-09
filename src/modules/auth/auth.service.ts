@@ -108,8 +108,6 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
-    if (user.emailVerified) return this.toPublicUser(user);
-
     const storedHash = await this.redis.get(dto.email, 'otp');
     if (storedHash) {
       throw new NotAcceptableException(SYS_MSG.OTP_NOT_EXPIRED);
