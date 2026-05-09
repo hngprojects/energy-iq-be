@@ -19,6 +19,7 @@ import { redisConfig } from './config/redis.config';
 import { BullModule } from '@nestjs/bullmq';
 import { bullConfig } from './config/queue.config';
 import { RedisModule } from './common/redis/redis.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -35,6 +36,12 @@ import { RedisModule } from './common/redis/redis.module';
     AuthModule,
     EmailModule,
     RedisModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 60,
+      },
+    ]),
   ],
   providers: [
     {
