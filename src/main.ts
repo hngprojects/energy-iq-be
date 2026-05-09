@@ -8,11 +8,15 @@ import { AppModule } from './app.module';
 import { env } from './config/env';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import type { Express } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+
+  const expressApp = app.getHttpAdapter().getInstance() as Express;
+  expressApp.set('trust proxy', 1);
 
   app.use(helmet());
   app.use(compression());
