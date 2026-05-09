@@ -17,6 +17,7 @@ import { EmailModule } from './modules/email/email.module';
 import { redisConfig } from './config/redis.config';
 import { BullModule } from '@nestjs/bullmq';
 import { bullConfig } from './config/queue.config';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { bullConfig } from './config/queue.config';
     UsersModule,
     AuthModule,
     EmailModule,
+    RedisModule,
   ],
   providers: [
     {

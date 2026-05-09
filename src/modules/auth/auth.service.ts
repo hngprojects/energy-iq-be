@@ -13,6 +13,8 @@ import { type ConfigType } from '@nestjs/config';
 import { jwtConfig } from '../../config/jwt.config';
 import { EmailService } from '../email/email.service';
 import { appConfig } from '../../config/app.config';
+import * as OtpUtil from '../../common/utils/otp.util';
+import { RedisService } from '../../common/redis/redis.service';
 
 export interface AuthTokens {
   accessToken: string;
@@ -33,6 +35,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
+    private readonly redis: RedisService,
   ) {}
 
   async register(dto: RegisterDto): Promise<PublicUser> {
@@ -43,10 +46,13 @@ export class AuthService {
       lastName: dto.lastName,
     });
 
+    const otp = OtpUtil.generateOtp();
+    await this.redis.set(dto.email, otp, 'otp', 1800);
+
     await this.emailService.sendVerifyEmail(
       user.email,
       `${user.firstName} ${user.lastName}`,
-      '000000',
+      otp,
       this.appCfg.clientUrl,
     );
 
