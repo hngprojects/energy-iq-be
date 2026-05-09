@@ -23,6 +23,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { appConfig } from '../../config/app.config';
 import { type ConfigType } from '@nestjs/config';
+import { ValidateRedirectUrl } from '../../common/utils/redirect.util';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -61,7 +62,9 @@ export class AuthController {
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth redirect' })
-  googleAuth() {}
+  googleAuth() {
+    // GoogleAuthGuard internally handles redirect to Google
+  }
 
   @Public()
   @Get('google/callback')
@@ -71,9 +74,11 @@ export class AuthController {
     @CurrentUser() authResponse: AuthResponse,
     @Res() res: Response,
   ) {
-    return res.redirect(
-      `${this.appCfg.clientUrl}/auth/callback?token=${authResponse.accessToken}`,
-    );
+    const redirectUrl = `${this.appCfg.clientUrl}/auth/callback`;
+
+    ValidateRedirectUrl(redirectUrl, this.appCfg.allowedRedirectOrigins);
+
+    return res.redirect(`${redirectUrl}#token=${authResponse.accessToken}`);
   }
 
   @Public()

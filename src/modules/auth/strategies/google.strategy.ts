@@ -4,6 +4,7 @@ import { AuthService } from '../auth.service';
 import { type ConfigType } from '@nestjs/config';
 import { googleConfig } from '../../../config/google.config';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { SYS_MSG } from '../../../common/constants/sys-msg';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -27,10 +28,17 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<void> {
     const { emails, name } = profile;
-    if (!emails || !name) {
-      throw new UnauthorizedException(
-        'Google account did not provide required profile information',
-      );
+    if (
+      !emails ||
+      emails.length === 0 ||
+      !name ||
+      !name.givenName ||
+      !name.familyName
+    ) {
+      throw new UnauthorizedException(SYS_MSG.MISSING_GOOGLE_PROFILE_INFO);
+    }
+    if (!emails[0].verified) {
+      throw new UnauthorizedException(SYS_MSG.UNVERIFIED_GOOGLE_ACCOUNT_EMAIL);
     }
     const authResponse = await this.authService.findOrCreateGoogleOAuthUser({
       email: emails[0].value,

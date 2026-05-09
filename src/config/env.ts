@@ -12,6 +12,7 @@ export const env = createEnv({
     PORT: z.coerce.number().int().positive().default(3000),
     HOST: z.string().default('localhost'),
     CLIENT_URL: z.url().default('http://localhost:3000'),
+    ALLOWED_REDIRECT_ORIGINS: z.string().default('http://localhost:3000,'), // add origins and separate with comma
 
     DATABASE_HOST: z.string().min(1),
     DATABASE_PORT: z.coerce.number().int().positive().default(5432),

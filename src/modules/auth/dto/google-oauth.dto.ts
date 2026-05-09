@@ -19,7 +19,7 @@ export class GoogleOAuthDto {
   @MaxLength(255)
   lastName: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '12345678' })
   @IsString()
   @MinLength(1)
   @MaxLength(255)

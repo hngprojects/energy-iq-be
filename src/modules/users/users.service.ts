@@ -43,12 +43,16 @@ export class UsersService {
 
     user = await this.userModelAction.findByEmail(dto.email);
     if (user) {
+      if (user.googleId && user.googleId !== dto.googleId) {
+        throw new ConflictException(SYS_MSG.CONFLICTING_GOOGLE_ACCOUNT);
+      }
       const updated = await this.userModelAction.update({
         ...noTransaction(),
         identifierOptions: { id: user.id },
         updatePayload: { googleId: dto.googleId, emailVerified: true },
       });
-      if (!updated) throw new NotFoundException(SYS_MSG.NOT_FOUND);
+      if (!updated)
+        throw new InternalServerErrorException(SYS_MSG.INTERNAL_SERVER_ERROR);
       return updated;
     }
 
