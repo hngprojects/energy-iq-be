@@ -8,9 +8,14 @@ import { PublicUser } from '../users/types/public-user.type';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { type ConfigType } from '@nestjs/config';
 import { jwtConfig } from '../../config/jwt.config';
+import { EmailService } from '../email/email.service';
+import { appConfig } from '../../config/app.config';
+import * as OtpUtil from '../../common/utils/otp.util';
+import { RedisService } from '../../common/redis/redis.service';
 
 export interface AuthTokens {
   accessToken: string;
@@ -26,8 +31,12 @@ export class AuthService {
   constructor(
     @Inject(jwtConfig.KEY)
     private readonly jwtCfg: ConfigType<typeof jwtConfig>,
+    @Inject(appConfig.KEY)
+    private readonly appCfg: ConfigType<typeof appConfig>,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
+    private readonly redis: RedisService,
   ) {}
 
   async register(dto: RegisterDto): Promise<PublicUser> {
@@ -37,6 +46,8 @@ export class AuthService {
       firstName: dto.firstName,
       lastName: dto.lastName,
     });
+
+    await this.sendVerificationEmail(user);
     return this.toPublicUser(user);
   }
 
@@ -47,7 +58,42 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
+    if (!user.emailVerified) {
+      await this.sendVerificationEmail(user);
+      throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
+    }
+
     return this.issueTokens(user);
+  }
+
+  async verifyEmail(dto: VerifyEmailDto): Promise<PublicUser> {
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_OTP);
+
+    if (user.emailVerified) return this.toPublicUser(user);
+
+    const attemptKey = `${dto.email}`;
+    const attemptsRaw = await this.redis.get(attemptKey, 'otp_attempts');
+    const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : 0;
+    if (attempts >= 5)
+      throw new UnauthorizedException(SYS_MSG.OTP_ATTEMPTS_EXCEEDED);
+
+    const storedHash = await this.redis.get(dto.email, 'otp');
+    const match = storedHash
+      ? await bcrypt.compare(dto.otp, storedHash)
+      : false;
+
+    if (!match) {
+      await this.redis.set(attemptKey, `${attempts + 1}`, 'otp_attempts', 900);
+      throw new UnauthorizedException(SYS_MSG.INVALID_OTP);
+    }
+
+    await this.usersService.setEmailVerified(user.id, true);
+    await this.redis.delete(dto.email, 'otp');
+    await this.redis.delete(attemptKey, 'otp_attempts');
+
+    user.emailVerified = true;
+    return this.toPublicUser(user);
   }
 
   async refresh(refreshToken: string): Promise<AuthTokens> {
@@ -123,5 +169,18 @@ export class AuthService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  private async sendVerificationEmail(user: User): Promise<void> {
+    const otp = OtpUtil.generateOtp();
+    const otpHash = await bcrypt.hash(otp, 10);
+    await this.redis.set(user.email, otpHash, 'otp', 900);
+
+    return this.emailService.sendVerifyEmail(
+      user.email,
+      `${user.firstName} ${user.lastName}`,
+      otp,
+      this.appCfg.clientUrl,
+    );
   }
 }

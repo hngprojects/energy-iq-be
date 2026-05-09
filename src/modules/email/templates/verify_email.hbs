@@ -1,0 +1,40 @@
+{{! verify-email.hbs }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify your email</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:40px 0;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;padding:40px;">
+            <tr>
+              <td>
+                <h1 style="color:#1a1a1a;font-size:24px;margin-bottom:8px;">Verify your email address</h1>
+                <p style="color:#555555;font-size:16px;line-height:1.5;">
+                  Hi {{fullName}}, thanks for signing up for Energy IQ. Please verify your email address to activate your account.
+                </p>
+                <p style="color:#555555;font-size:16px;line-height:1.5;margin:24px 0 8px;">
+                  Your verification code is:
+                </p>
+                <p style="color:#2563eb;font-size:28px;letter-spacing:4px;font-weight:bold;margin:0 0 24px;">
+                  {{verifyCode}}
+                </p>
+                <hr style="border:none;border-top:1px solid #eeeeee;margin:32px 0;" />
+                <p style="color:#999999;font-size:13px;">
+                  This code expires in <strong>24 hours</strong>. If you didn't create an account, you can safely ignore this email.
+                </p>
+                <p style="color:#999999;font-size:13px;">
+                  You can also visit us at <a href="{{clientUrl}}" style="color:#2563eb;">{{clientUrl}}</a>.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

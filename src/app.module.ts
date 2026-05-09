@@ -13,19 +13,27 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
+import { EmailModule } from './modules/email/email.module';
+import { redisConfig } from './config/redis.config';
+import { BullModule } from '@nestjs/bullmq';
+import { bullConfig } from './config/queue.config';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig],
+      load: [appConfig, databaseConfig, jwtConfig, redisConfig],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => databaseConfig(),
     }),
+    BullModule.forRoot(bullConfig),
     HealthModule,
     UsersModule,
     AuthModule,
+    EmailModule,
+    RedisModule,
   ],
   providers: [
     {
