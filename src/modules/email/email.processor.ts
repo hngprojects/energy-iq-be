@@ -120,14 +120,7 @@ export class EmailProcessor extends WorkerHost {
     context: Record<string, unknown>,
   ): string {
     if (!this.templateCache.has(name)) {
-      const filePath = path.join(
-        process.cwd(),
-        'src',
-        'modules',
-        'email',
-        'templates',
-        `${name}.hbs`,
-      );
+      const filePath = path.join(__dirname, 'templates', `${name}.hbs`);
       const source = fs.readFileSync(filePath, 'utf8');
       this.templateCache.set(name, Handlebars.compile(source));
     }
