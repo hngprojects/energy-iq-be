@@ -17,7 +17,6 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { AuthThrottlerGuard } from './guards/throttler.guard';
 import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Auth')
@@ -34,7 +33,6 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(AuthThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -44,7 +42,6 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(AuthThrottlerGuard)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
@@ -54,7 +51,6 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(AuthThrottlerGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
