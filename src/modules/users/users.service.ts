@@ -86,4 +86,12 @@ export class UsersService {
       updatePayload: { refreshTokenHash: hash },
     });
   }
+
+  async setEmailVerified(id: string, emailVerified: boolean): Promise<void> {
+    await this.userModelAction.update({
+      ...noTransaction(),
+      identifierOptions: { id },
+      updatePayload: { emailVerified },
+    });
+  }
 }

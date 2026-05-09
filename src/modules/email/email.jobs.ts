@@ -16,7 +16,7 @@ export interface PasswordResetJobData {
 
 export interface VerifyEmailJobData {
   to: string;
-  verifyLink: string;
+  verifyCode: string;
   fullName: string;
   clientUrl: string;
 }

@@ -52,13 +52,13 @@ describe('EmailService', () => {
     await service.sendVerifyEmail(
       'user@example.com',
       'John Doe',
-      'https://verify.link',
+      '123456',
       'https://app.example.com',
     );
     expect(mockQueue.add).toHaveBeenCalledWith('verify_email', {
       to: 'user@example.com',
       fullName: 'John Doe',
-      verifyLink: 'https://verify.link',
+      verifyCode: '123456',
       clientUrl: 'https://app.example.com',
     });
   });

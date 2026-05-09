@@ -30,13 +30,13 @@ export class EmailService {
   async sendVerifyEmail(
     to: string,
     fullName: string,
-    verifyLink: string,
+    verifyCode: string,
     clientUrl: string,
   ): Promise<void> {
     await this.emailQueue.add(EMAIL_JOBS.VERIFY_EMAIL, {
       to,
       fullName,
-      verifyLink,
+      verifyCode,
       clientUrl,
     } satisfies VerifyEmailJobData);
   }

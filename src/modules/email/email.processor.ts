@@ -90,10 +90,10 @@ export class EmailProcessor extends WorkerHost {
   }
 
   private async handleVerifyEmail(job: Job<VerifyEmailJobData>): Promise<void> {
-    const { to, verifyLink, fullName, clientUrl } = job.data;
+    const { to, verifyCode, fullName, clientUrl } = job.data;
     this.logger.log(`Sending verify email to ${to}`);
     const html = this.renderTemplate(EMAIL_JOBS.VERIFY_EMAIL, {
-      verifyLink,
+      verifyCode,
       fullName,
       clientUrl,
     });
