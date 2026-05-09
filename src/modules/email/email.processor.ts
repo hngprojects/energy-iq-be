@@ -43,7 +43,9 @@ export class EmailProcessor extends WorkerHost {
       case EMAIL_JOBS.VERIFY_EMAIL:
         return this.handleVerifyEmail(job as Job<VerifyEmailJobData>);
       default:
-        this.logger.warn(`Unknown job type: ${job.name}`);
+        const message = `Unknown job type: ${job.name}`;
+        this.logger.warn(message);
+        throw new Error(message);
     }
   }
 
