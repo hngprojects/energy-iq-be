@@ -44,6 +44,13 @@ export const env = createEnv({
       .union([z.boolean(), z.enum(['true', 'false'])])
       .default(true)
       .transform((v) => v === true || v === 'true'),
+
+    CHAT_CONTEXT_LENGTH: z
+      .int()
+      .min(0, 'CHAT_CONTEXT_LENGTH must be an integer greater than 0'),
+    CHAT_EXP_TIMEOUT_SECONDS: z
+      .int()
+      .min(0, 'CHAT_EXP_TIMEOUT_SECONDS must be an integer greater than 0'),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
