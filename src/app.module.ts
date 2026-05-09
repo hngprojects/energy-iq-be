@@ -14,12 +14,13 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { chatbotConfig } from './config/chatbot.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig],
+      load: [appConfig, chatbotConfig, databaseConfig, jwtConfig],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => databaseConfig(),
