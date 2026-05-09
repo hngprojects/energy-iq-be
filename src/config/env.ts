@@ -45,12 +45,16 @@ export const env = createEnv({
       .default(true)
       .transform((v) => v === true || v === 'true'),
 
-    CHAT_CONTEXT_LENGTH: z
+    CHAT_CONTEXT_LENGTH: z.coerce
+      .number()
       .int()
-      .min(0, 'CHAT_CONTEXT_LENGTH must be an integer greater than 0'),
-    CHAT_EXP_TIMEOUT_SECONDS: z
+      .positive()
+      .transform((v) => Number(v)),
+    CHAT_EXP_TIMEOUT_SECONDS: z.coerce
+      .number()
       .int()
-      .min(0, 'CHAT_EXP_TIMEOUT_SECONDS must be an integer greater than 0'),
+      .positive()
+      .transform((v) => Number(v)),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

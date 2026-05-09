@@ -1,0 +1,42 @@
+import { AbstractModelAction } from '@hng-sdk/orm';
+import { Injectable } from '@nestjs/common';
+import { Message } from '../entities/message.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+@Injectable()
+export class MessageModelAction extends AbstractModelAction<Message> {
+  constructor(@InjectRepository(Message) repository: Repository<Message>) {
+    super(repository, Message);
+  }
+
+  async findByChatId(chatId: string): Promise<Message[]> {
+    const result = await this.list({
+      filterRecordOptions: { chat: { id: chatId } },
+    });
+    return result.payload;
+  }
+
+  async saveMessage(message: Message) {
+    return this.save({
+      entity: message,
+      transactionOptions: { useTransaction: false },
+    });
+  }
+
+  async saveMessages(messages: Message[]) {
+    return this.repository.save(messages);
+  }
+
+  async updateMessageById(id: string, data: Partial<Message>) {
+    return this.update({
+      updatePayload: data,
+      identifierOptions: {
+        id,
+      },
+      transactionOptions: {
+        useTransaction: false,
+      },
+    });
+  }
+}
