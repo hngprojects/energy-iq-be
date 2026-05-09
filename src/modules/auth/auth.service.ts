@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  Inject,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { StringValue } from 'ms';
@@ -73,7 +68,7 @@ export class AuthService {
 
   async verifyEmail(dto: VerifyEmailDto): Promise<PublicUser> {
     const user = await this.usersService.findByEmail(dto.email);
-    if (!user) throw new NotFoundException(SYS_MSG.NOT_FOUND);
+    if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_OTP);
 
     if (user.emailVerified) return this.toPublicUser(user);
 
@@ -97,8 +92,8 @@ export class AuthService {
     await this.redis.delete(dto.email, 'otp');
     await this.redis.delete(attemptKey, 'otp_attempts');
 
-    const refreshed = await this.usersService.findOne(user.id);
-    return this.toPublicUser(refreshed);
+    user.emailVerified = true;
+    return this.toPublicUser(user);
   }
 
   async refresh(refreshToken: string): Promise<AuthTokens> {
