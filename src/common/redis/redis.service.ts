@@ -12,7 +12,7 @@ import { redisConfig } from '../../config/redis.config';
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
-  public redisClient: Redis.Redis;
+  private readonly clients = new Map<number, Redis.Redis>();
 
   constructor(
     @Inject(redisConfig.KEY)
@@ -20,28 +20,40 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    this.logger.log('Connecting to Redis (DB 1)...');
+    this.getClient(this.redisConfiguration.redisDefaultDb);
+  }
 
-    this.redisClient = new Redis.Redis({
+  async onModuleDestroy() {
+    const quits = Array.from(this.clients.values()).map((client) =>
+      client.quit(),
+    );
+    await Promise.all(quits);
+    this.logger.log('Redis clients closed');
+  }
+
+  getClient(db = this.redisConfiguration.redisDefaultDb): Redis.Redis {
+    const existing = this.clients.get(db);
+    if (existing) return existing;
+
+    this.logger.log(`Connecting to Redis (DB ${db})...`);
+    const client = new Redis.Redis({
       host: this.redisConfiguration.redisHost,
       port: this.redisConfiguration.redisPort,
-      db: 1,
+      db,
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
     });
 
-    this.redisClient.on('connect', () => {
-      this.logger.log('Redis client connected (DB 1)');
+    client.on('connect', () => {
+      this.logger.log(`Redis client connected (DB ${db})`);
     });
 
-    this.redisClient.on('error', (error) => {
-      this.logger.error('Redis client error:', error);
+    client.on('error', (error) => {
+      this.logger.error(`Redis client error (DB ${db}):`, error);
     });
-  }
 
-  async onModuleDestroy() {
-    await this.redisClient.quit();
-    this.logger.log('Redis client closed (DB 1)');
+    this.clients.set(db, client);
+    return client;
   }
 
   /**
@@ -50,10 +62,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
    * key: this is the unique key used to store a value in redis (email)
    * unique: this is a unique group that a key belong to (otp, verify)
    */
-  async get(key: string, unique: string): Promise<string | null> {
-    return await this.redisClient.get(
-      `${unique.toLowerCase()}:${key.toLowerCase()}`,
-    ); //
+  async get(key: string, unique: string, db?: number): Promise<string | null> {
+    const client = this.getClient(db);
+    return await client.get(`${unique.toLowerCase()}:${key.toLowerCase()}`); //
   }
 
   /**
@@ -69,19 +80,18 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     value: string,
     unique: string,
     ttl?: number,
+    db?: number,
   ): Promise<void> {
+    const client = this.getClient(db);
     if (ttl) {
-      await this.redisClient.set(
+      await client.set(
         `${unique.toLowerCase()}:${key.toLowerCase()}`,
         value,
         'EX',
         ttl,
       );
     } else {
-      await this.redisClient.set(
-        `${unique.toLowerCase()}:${key.toLowerCase()}`,
-        value,
-      );
+      await client.set(`${unique.toLowerCase()}:${key.toLowerCase()}`, value);
     }
   }
 
@@ -91,7 +101,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
    * key: this is the unique key used to store a value in redis (email)
    * unique: this is a unique group that a key belong to (otp, verify)
    */
-  async delete(key: string, unique: string): Promise<void> {
-    await this.redisClient.del(`${unique.toLowerCase()}:${key.toLowerCase()}`);
+  async delete(key: string, unique: string, db?: number): Promise<void> {
+    const client = this.getClient(db);
+    await client.del(`${unique.toLowerCase()}:${key.toLowerCase()}`);
   }
 }

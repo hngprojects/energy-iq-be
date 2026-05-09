@@ -1,11 +1,14 @@
 import { BullRootModuleOptions } from '@nestjs/bullmq';
 import { env } from './env';
+import { redisConfig } from './redis.config';
+
+const redisCfg = redisConfig();
 
 export const bullConfig: BullRootModuleOptions = {
   connection: {
     host: env.REDIS_HOST,
     port: env.REDIS_PORT,
-    db: 0,
+    db: redisCfg.redisQueueDb,
   },
   defaultJobOptions: {
     attempts: 3,
