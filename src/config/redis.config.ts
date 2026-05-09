@@ -8,4 +8,5 @@ export const redisConfig = registerAs('redis', () => ({
   redisOtpDb: 1,
   redisQueueDb: 2,
   redisCacheDb: 3,
+  redisDefaultTTL: env.REDIS_DEFAULT_TTL,
 }));

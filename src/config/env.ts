@@ -33,6 +33,7 @@ export const env = createEnv({
 
     REDIS_HOST: z.string().default('localhost'),
     REDIS_PORT: z.coerce.number().int().positive().default(6379),
+    REDIS_DEFAULT_TTL: z.coerce.number().int().positive().default(900),
 
     RESEND_API_KEY: z.string().min(1).default('invalid_key'),
 

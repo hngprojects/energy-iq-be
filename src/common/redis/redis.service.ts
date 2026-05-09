@@ -83,16 +83,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     db?: number,
   ): Promise<void> {
     const client = this.getClient(db);
-    if (ttl) {
-      await client.set(
-        `${unique.toLowerCase()}:${key.toLowerCase()}`,
-        value,
-        'EX',
-        ttl,
-      );
-    } else {
-      await client.set(`${unique.toLowerCase()}:${key.toLowerCase()}`, value);
-    }
+    await client.set(
+      `${unique.toLowerCase()}:${key.toLowerCase()}`,
+      value,
+      'EX',
+      ttl ?? this.redisConfiguration.redisDefaultTTL,
+    );
   }
 
   /**
