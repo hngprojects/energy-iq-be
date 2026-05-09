@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { GoogleOAuthDto } from '../auth/dto/google-oauth.dto';
 
 const BCRYPT_ROUNDS = 10;
 
@@ -32,6 +33,33 @@ export class UsersService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         role: dto.role,
+      },
+    });
+  }
+
+  async findOrCreateByGoogle(dto: GoogleOAuthDto): Promise<User> {
+    let user = await this.userModelAction.findByGoogleId(dto.googleId);
+    if (user) return user;
+
+    user = await this.userModelAction.findByEmail(dto.email);
+    if (user) {
+      const updated = await this.userModelAction.update({
+        ...noTransaction(),
+        identifierOptions: { id: user.id },
+        updatePayload: { googleId: dto.googleId, emailVerified: true },
+      });
+      if (!updated) throw new NotFoundException(SYS_MSG.NOT_FOUND);
+      return updated;
+    }
+
+    return this.userModelAction.create({
+      ...noTransaction(),
+      createPayload: {
+        email: dto.email,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        googleId: dto.googleId,
+        emailVerified: true,
       },
     });
   }

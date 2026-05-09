@@ -16,6 +16,7 @@ import { EmailService } from '../email/email.service';
 import { appConfig } from '../../config/app.config';
 import * as OtpUtil from '../../common/utils/otp.util';
 import { RedisService } from '../../common/redis/redis.service';
+import { GoogleOAuthDto } from './dto/google-oauth.dto';
 
 export interface AuthTokens {
   accessToken: string;
@@ -49,6 +50,13 @@ export class AuthService {
 
     await this.sendVerificationEmail(user);
     return this.toPublicUser(user);
+  }
+
+  async findOrCreateGoogleOAuthUser(
+    dto: GoogleOAuthDto,
+  ): Promise<AuthResponse> {
+    const user = await this.usersService.findOrCreateByGoogle(dto);
+    return this.issueTokens(user);
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {

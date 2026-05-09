@@ -4,24 +4,34 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { type Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
-import { AuthService } from './auth.service';
+import { AuthService, type AuthResponse } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { appConfig } from '../../config/app.config';
+import { type ConfigType } from '@nestjs/config';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    @Inject(appConfig.KEY)
+    private readonly appCfg: ConfigType<typeof appConfig>,
+  ) {}
 
   @Public()
   @Post('register')
@@ -45,6 +55,25 @@ export class AuthController {
   @ApiOperation({ summary: 'Verify a user email address' })
   verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyEmail(dto);
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Initiate Google OAuth redirect' })
+  googleAuth() {}
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  googleCallback(
+    @CurrentUser() authResponse: AuthResponse,
+    @Res() res: Response,
+  ) {
+    return res.redirect(
+      `${this.appCfg.clientUrl}/auth/callback?token=${authResponse.accessToken}`,
+    );
   }
 
   @Public()

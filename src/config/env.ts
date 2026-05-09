@@ -11,7 +11,7 @@ export const env = createEnv({
       .default('development'),
     PORT: z.coerce.number().int().positive().default(3000),
     HOST: z.string().default('localhost'),
-    CLIENT_URL: z.string().default('http://localhost:3000'),
+    CLIENT_URL: z.url().default('http://localhost:3000'),
 
     DATABASE_HOST: z.string().min(1),
     DATABASE_PORT: z.coerce.number().int().positive().default(5432),
@@ -44,6 +44,10 @@ export const env = createEnv({
       .string()
       .min(32, 'JWT_REFRESH_SECRET must be at least 32 chars'),
     JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
+    GOOGLE_CALLBACK_URL: z.url(),
 
     CORS_ORIGIN: z.string().default('*'),
     SWAGGER_ENABLED: z

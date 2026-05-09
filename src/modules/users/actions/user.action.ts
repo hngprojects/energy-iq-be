@@ -16,4 +16,8 @@ export class UserModelAction extends AbstractModelAction<User> {
   async findByEmail(email: string): Promise<User | null> {
     return this.get({ identifierOptions: { email } });
   }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.get({ identifierOptions: { googleId } });
+  }
 }
