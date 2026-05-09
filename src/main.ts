@@ -44,11 +44,12 @@ async function bootstrap() {
       )
       .setVersion(packageJson.version)
       .addServer(`http://localhost:${env.PORT}`, 'Local Development')
-      .addServer('https://api.energyiq.example.com', 'Production')
+      .addServer('', 'Current Environment')
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document, {
+      useGlobalPrefix: true,
       swaggerOptions: {
         persistAuthorization: true,
         displayRequestDuration: true,
@@ -71,7 +72,7 @@ async function bootstrap() {
   });
 
   if (env.SWAGGER_ENABLED)
-    logger.log(`Swagger docs: http://localhost:${env.PORT}/docs`);
+    logger.log(`Swagger docs: http://${env.HOST}:${env.PORT}/api/docs`);
 }
 
 void bootstrap();
