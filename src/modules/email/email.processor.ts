@@ -62,7 +62,12 @@ export class EmailProcessor extends WorkerHost {
     });
 
     if (error) {
-      this.logger.error(`Welcome email failed for ${to}`, error);
+      this.logger.error(
+        `Welcome email failed for ${to}`,
+        error.name,
+        error.message,
+        error.statusCode,
+      );
       throw new Error(error.message);
     }
 
@@ -84,7 +89,12 @@ export class EmailProcessor extends WorkerHost {
     });
 
     if (error) {
-      this.logger.error(`Password reset email failed for ${to}`, error);
+      this.logger.error(
+        `Password reset email failed for ${to}`,
+        error.name,
+        error.message,
+        error.statusCode,
+      );
       throw new Error(error.message);
     }
 
@@ -108,7 +118,12 @@ export class EmailProcessor extends WorkerHost {
     });
 
     if (error) {
-      this.logger.error(`Verify email failed for ${to}`, error);
+      this.logger.error(
+        `Verify email failed for ${to}`,
+        error.name,
+        error.message,
+        error.statusCode,
+      );
       throw new Error(error.message);
     }
 
