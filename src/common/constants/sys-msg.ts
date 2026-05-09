@@ -19,4 +19,5 @@ export const SYS_MSG = {
   INVALID_OTP: 'The verification code is invalid or has expired',
   OTP_ATTEMPTS_EXCEEDED: 'Too many verification attempts. Try again later',
   EMAIL_NOT_VERIFIED: 'This user email is not verified',
+  OTP_NOT_EXPIRED: 'Your otp has not expired yet',
 } as const;
