@@ -12,6 +12,7 @@ import { jwtConfig } from './config/jwt.config';
 import { googleConfig } from './config/google.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { AppThrottlerGuard } from './common/guards/throttler.guard';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { EmailModule } from './modules/email/email.module';
@@ -19,6 +20,7 @@ import { redisConfig } from './config/redis.config';
 import { BullModule } from '@nestjs/bullmq';
 import { bullConfig } from './config/queue.config';
 import { RedisModule } from './common/redis/redis.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -35,6 +37,12 @@ import { RedisModule } from './common/redis/redis.module';
     AuthModule,
     EmailModule,
     RedisModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 60,
+      },
+    ]),
   ],
   providers: [
     {
@@ -47,6 +55,7 @@ import { RedisModule } from './common/redis/redis.module';
       }),
     },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: AppThrottlerGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

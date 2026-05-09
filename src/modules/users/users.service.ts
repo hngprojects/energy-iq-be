@@ -68,6 +68,27 @@ export class UsersService {
     });
   }
 
+  async findOrCreateByGoogle2(dto: GoogleOAuthDto): Promise<User> {
+    const existing = await this.userModelAction.findByGoogleId(dto.googleId);
+    if (existing) return existing;
+
+    const existingByEmail = await this.userModelAction.findByEmail(dto.email);
+
+    if (
+      existingByEmail?.googleId &&
+      existingByEmail.googleId !== dto.googleId
+    ) {
+      throw new ConflictException(SYS_MSG.CONFLICTING_GOOGLE_ACCOUNT);
+    }
+
+    return this.userModelAction.upsertByGoogle({
+      email: dto.email,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      googleId: dto.googleId,
+    });
+  }
+
   findAll(pagination: PaginationDto) {
     return this.userModelAction.list({
       paginationPayload: { page: pagination.page!, limit: pagination.limit! },
