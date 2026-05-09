@@ -43,19 +43,15 @@ async function bootstrap() {
         'AI-powered energy management platform API for Nigerian SMEs and African businesses',
       )
       .setVersion(packageJson.version)
-      .addServer(`http://localhost:${env.PORT}`, 'Local Development')
-      .addServer('', 'Current Environment')
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document, {
-      useGlobalPrefix: true,
+    SwaggerModule.setup('api/docs', app, document, {
       swaggerOptions: {
         persistAuthorization: true,
         displayRequestDuration: true,
         deepLinking: true,
         filter: true,
-        tryItOutEnabled: false,
       },
     });
   }
