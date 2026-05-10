@@ -38,37 +38,6 @@ export class UsersService {
   }
 
   async findOrCreateByGoogle(dto: GoogleOAuthDto): Promise<User> {
-    let user = await this.userModelAction.findByGoogleId(dto.googleId);
-    if (user) return user;
-
-    user = await this.userModelAction.findByEmail(dto.email);
-    if (user) {
-      if (user.googleId && user.googleId !== dto.googleId) {
-        throw new ConflictException(SYS_MSG.CONFLICTING_GOOGLE_ACCOUNT);
-      }
-      const updated = await this.userModelAction.update({
-        ...noTransaction(),
-        identifierOptions: { id: user.id },
-        updatePayload: { googleId: dto.googleId, emailVerified: true },
-      });
-      if (!updated)
-        throw new InternalServerErrorException(SYS_MSG.INTERNAL_SERVER_ERROR);
-      return updated;
-    }
-
-    return this.userModelAction.create({
-      ...noTransaction(),
-      createPayload: {
-        email: dto.email,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        googleId: dto.googleId,
-        emailVerified: true,
-      },
-    });
-  }
-
-  async findOrCreateByGoogle2(dto: GoogleOAuthDto): Promise<User> {
     const existing = await this.userModelAction.findByGoogleId(dto.googleId);
     if (existing) return existing;
 

@@ -1,5 +1,5 @@
 import { AbstractModelAction } from '@hng-sdk/orm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -42,10 +42,15 @@ export class UserModelAction extends AbstractModelAction<User> {
         ['googleId', 'emailVerified'], // columns to update on conflict
         ['email'], // conflict target (unique column)
       )
-      .returning('*')
+      .returning(['id'])
       .execute();
 
     const raw = result.raw as User[];
-    return raw[0];
+    const id: string = (result.identifiers[0]?.id as string) ?? raw[0]?.id;
+    const user = await this.get({ identifierOptions: { id } });
+    if (!user) {
+      throw new InternalServerErrorException('Failed to load upserted user');
+    }
+    return user;
   }
 }
