@@ -74,6 +74,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 2, ttl: 30000 } })
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
