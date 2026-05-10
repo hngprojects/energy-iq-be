@@ -34,8 +34,10 @@ export const env = createEnv({
 
     REDIS_HOST: z.string().default('localhost'),
     REDIS_PORT: z.coerce.number().int().positive().default(6379),
+    REDIS_DEFAULT_TTL: z.coerce.number().int().positive().default(900),
 
     RESEND_API_KEY: z.string().min(1),
+    RESEND_FROM: z.string().email().default('energyiq@hng14.com'),
 
     JWT_ACCESS_SECRET: z
       .string()

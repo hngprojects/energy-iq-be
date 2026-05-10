@@ -83,16 +83,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     db?: number,
   ): Promise<void> {
     const client = this.getClient(db);
-    if (ttl) {
-      await client.set(
-        `${unique.toLowerCase()}:${key.toLowerCase()}`,
-        value,
-        'EX',
-        ttl,
-      );
-    } else {
-      await client.set(`${unique.toLowerCase()}:${key.toLowerCase()}`, value);
-    }
+    const effectiveTtl = ttl ?? this.redisConfiguration.redisDefaultTTL;
+    if (!Number.isInteger(effectiveTtl) || effectiveTtl <= 0)
+      throw new Error(`Invalid Redis TTL: ${effectiveTtl}`);
+
+    await client.set(
+      `${unique.toLowerCase()}:${key.toLowerCase()}`,
+      value,
+      'EX',
+      effectiveTtl,
+    );
   }
 
   /**
