@@ -8,11 +8,9 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
-  Post,
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
@@ -22,12 +20,6 @@ import { UsersService } from './users.service';
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Create a user' })
-  create(@Body() dto: CreateUserDto) {
-    return this.usersService.create(dto);
-  }
 
   @Get()
   @ApiOperation({ summary: 'List users (paginated)' })
