@@ -13,6 +13,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
+import { Service } from './modules/inverters/.service';
+import { InvertersService } from './modules/inverters/inverters.service';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { UsersModule } from './modules/users/users.module';
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
+    Service,
+    InvertersService,
   ],
 })
 export class AppModule {}
