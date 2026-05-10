@@ -38,10 +38,7 @@ export class UserModelAction extends AbstractModelAction<User> {
         googleId: data.googleId,
         emailVerified: true,
       })
-      .orUpdate(
-        ['googleId', 'emailVerified'], // columns to update on conflict
-        ['email'], // conflict target (unique column)
-      )
+      .orUpdate(['google_id', 'email_verified'], ['email'])
       .returning(['id'])
       .execute();
 
