@@ -21,6 +21,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { bullConfig } from './config/queue.config';
 import { RedisModule } from './common/redis/redis.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { InvertersModule } from './modules/inverters/inverters.module';
+import { InvertersMetricsModule } from './modules/inverters-metrics/inverters-metrics.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
         limit: 60,
       },
     ]),
+    InvertersModule,
+    InvertersMetricsModule,
   ],
   providers: [
     {
