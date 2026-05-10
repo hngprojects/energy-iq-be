@@ -13,7 +13,7 @@ import { InvertersMetrics } from '../../inverters-metrics/entities/inverters-met
 
 @Entity('inverters')
 @Index(['userId', 'isActive'])
-@Index(['brand', 'serialNumber'], { unique: true })
+@Index(['brand', 'serialNumber'])
 export class Inverter extends AbstractBaseEntity {
   @Column({ type: 'uuid' })
   userId: string;

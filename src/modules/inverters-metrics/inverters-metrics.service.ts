@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { InvertersMetrics } from './entities/inverters-metrics.entity';
 import { ChartReadingDto } from './dto/chart-reading.dto';
+import { BadRequestException } from '@nestjs/common';
+import { SYS_MSG } from '../../common/constants/sys-msg';
 
 @Injectable()
 export class InvertersMetricsService {
@@ -15,7 +17,7 @@ export class InvertersMetricsService {
   async getDashboardMetrics(inverterId: string) {
     const latest = await this.metricsRepository.findOne({
       where: { inverterId },
-      order: { createdAt: 'DESC' },
+      order: { metricTimestamp: 'DESC' },
     });
 
     const todayStart = new Date();
@@ -67,6 +69,9 @@ export class InvertersMetricsService {
     inverterId: string,
     period: 'hourly' | 'daily' | 'weekly' | 'monthly',
   ) {
+    if (['hourly', 'daily', 'weekly', 'monthly'].includes(period) === false) {
+      throw new BadRequestException(SYS_MSG.BAD_REQUEST);
+    }
     const now = new Date();
     const startDate = this.getStartDate(period, now);
 

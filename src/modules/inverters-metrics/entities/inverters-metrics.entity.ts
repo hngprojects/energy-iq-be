@@ -4,7 +4,6 @@ import { Inverter } from '../../inverters/entities/inverters.entity';
 
 @Entity('inverter_metrics')
 @Index(['inverterId', 'createdAt'])
-@Index(['inverterId'])
 export class InvertersMetrics extends AbstractBaseEntity {
   @Column({ type: 'uuid' })
   inverterId: string;

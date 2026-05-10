@@ -1,4 +1,4 @@
-// inverter.enum.ts
+// inverter-brand.enum.ts
 export enum InverterBrand {
   VICTRON = 'VICTRON',
   GROWATT = 'GROWATT',

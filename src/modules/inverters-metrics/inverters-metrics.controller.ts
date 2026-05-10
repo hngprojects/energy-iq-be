@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InvertersMetricsService } from './inverters-metrics.service';
+import { ParseUUIDPipe } from '@nestjs/common/pipes/parse-uuid.pipe';
 
 @ApiTags('Inverter Metrics')
 @UseGuards(JwtAuthGuard)
@@ -12,7 +13,7 @@ export class InvertersMetricsController {
 
   @Get(':inverterId/dashboard')
   @ApiOperation({ summary: 'Get dashboard metrics for an inverter' })
-  getDashboardMetrics(@Param('inverterId') inverterId: string) {
+  getDashboardMetrics(@Param('inverterId', ParseUUIDPipe) inverterId: string) {
     return this.metricsService.getDashboardMetrics(inverterId);
   }
 
