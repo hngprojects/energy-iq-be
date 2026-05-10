@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  Inject,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { StringValue } from 'ms';
@@ -16,6 +21,7 @@ import { EmailService } from '../email/email.service';
 import { appConfig } from '../../config/app.config';
 import * as OtpUtil from '../../common/utils/otp.util';
 import { RedisService } from '../../common/redis/redis.service';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 
 export interface AuthTokens {
   accessToken: string;
@@ -93,6 +99,21 @@ export class AuthService {
     await this.redis.delete(attemptKey, 'otp_attempts');
 
     user.emailVerified = true;
+    return this.toPublicUser(user);
+  }
+
+  async resendVerificationEmail(dto: ResendVerificationDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new NotFoundException(SYS_MSG.USER_NOT_FOUND);
+
+    const attemptKey = `${dto.email}_resends`;
+    const attemptsRaw = await this.redis.get(attemptKey, 'otp_attempts');
+    const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : 0;
+    if (attempts >= 5)
+      throw new UnauthorizedException(SYS_MSG.OTP_ATTEMPTS_EXCEEDED);
+
+    await this.redis.set(attemptKey, `${attempts + 1}`, 'otp_attempts', 900);
+    await this.sendVerificationEmail(user);
     return this.toPublicUser(user);
   }
 
