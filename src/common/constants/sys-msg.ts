@@ -22,4 +22,12 @@ export const SYS_MSG = {
   OTP_NOT_EXPIRED: 'Your verification code has not expired yet',
 
   USER_NOT_FOUND: 'No user found with the provided email address',
+  UNVERIFIED_GOOGLE_ACCOUNT_EMAIL: 'Google account email is not verified',
+  MISSING_GOOGLE_PROFILE_INFO:
+    'Google account did not provide required profile information',
+  CONFLICTING_GOOGLE_ACCOUNT:
+    'This email is already linked to a different Google account',
+  INVALID_REDIRECT_URL: 'Invalid redirect URL',
+  INVALID_REDIRECT_URL_PROTOCOL: 'Invalid redirect URL protocol',
+  FORBIDDEN_REDIRECT_URL: 'Redirected URL origin not permitted',
 } as const;

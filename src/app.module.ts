@@ -9,6 +9,7 @@ import { appConfig } from './config/app.config';
 import { databaseConfig } from './config/database.config';
 import './config/env';
 import { jwtConfig } from './config/jwt.config';
+import { googleConfig } from './config/google.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { AppThrottlerGuard } from './common/guards/throttler.guard';
@@ -25,7 +26,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig, redisConfig],
+      load: [appConfig, databaseConfig, jwtConfig, redisConfig, googleConfig],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => databaseConfig(),

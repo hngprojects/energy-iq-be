@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { GoogleOAuthDto } from '../auth/dto/google-oauth.dto';
 
 const BCRYPT_ROUNDS = 10;
 
@@ -33,6 +34,27 @@ export class UsersService {
         lastName: dto.lastName,
         role: dto.role,
       },
+    });
+  }
+
+  async findOrCreateByGoogle(dto: GoogleOAuthDto): Promise<User> {
+    const existing = await this.userModelAction.findByGoogleId(dto.googleId);
+    if (existing) return existing;
+
+    const existingByEmail = await this.userModelAction.findByEmail(dto.email);
+
+    if (
+      existingByEmail?.googleId &&
+      existingByEmail.googleId !== dto.googleId
+    ) {
+      throw new ConflictException(SYS_MSG.CONFLICTING_GOOGLE_ACCOUNT);
+    }
+
+    return this.userModelAction.upsertByGoogle({
+      email: dto.email,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      googleId: dto.googleId,
     });
   }
 
