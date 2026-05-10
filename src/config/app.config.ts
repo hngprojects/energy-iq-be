@@ -7,5 +7,6 @@ export const appConfig = registerAs('app', () => ({
   corsOrigin: env.CORS_ORIGIN,
   swaggerEnabled: env.SWAGGER_ENABLED,
   resendApiKey: env.RESEND_API_KEY,
+  resendFrom: env.RESEND_FROM,
   clientUrl: env.CLIENT_URL,
 }));

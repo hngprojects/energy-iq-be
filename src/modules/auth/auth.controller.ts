@@ -77,7 +77,7 @@ export class AuthController {
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Resend a verification email when the code expires',
+    summary: 'Resend a verification email if no active code exists',
   })
   resendVerification(@Body() dto: ResendVerificationDto) {
     return this.authService.resendVerificationEmail(dto);

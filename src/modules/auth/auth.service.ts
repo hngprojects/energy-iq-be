@@ -2,7 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   Inject,
-  NotAcceptableException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -59,11 +59,9 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     const user = await this.usersService.findByEmail(dto.email);
-    console.log({ user });
     if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
-    console.log({ valid });
     if (!valid) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
 
     if (!user.emailVerified) {
@@ -106,19 +104,13 @@ export class AuthService {
 
   async resendVerificationEmail(dto: ResendVerificationDto) {
     const user = await this.usersService.findByEmail(dto.email);
-    if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_CREDENTIALS);
-
-    const storedHash = await this.redis.get(dto.email, 'otp');
-    if (storedHash) {
-      throw new NotAcceptableException(SYS_MSG.OTP_NOT_EXPIRED);
-    }
+    if (!user) throw new NotFoundException(SYS_MSG.USER_NOT_FOUND);
 
     const attemptKey = `${dto.email}_resends`;
     const attemptsRaw = await this.redis.get(attemptKey, 'otp_attempts');
     const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : 0;
-    if (attempts >= 5) {
+    if (attempts >= 5)
       throw new UnauthorizedException(SYS_MSG.OTP_ATTEMPTS_EXCEEDED);
-    }
 
     await this.redis.set(attemptKey, `${attempts + 1}`, 'otp_attempts', 900);
     await this.sendVerificationEmail(user);

@@ -42,20 +42,28 @@ export class EmailProcessor extends WorkerHost {
         return this.handlePasswordReset(job as Job<PasswordResetJobData>);
       case EMAIL_JOBS.VERIFY_EMAIL:
         return this.handleVerifyEmail(job as Job<VerifyEmailJobData>);
-      default:
+      default: {
         const message = `Unknown job type: ${job.name}`;
         this.logger.warn(message);
         throw new Error(message);
+      }
     }
+  }
+
+  private maskEmail(email: string): string {
+    const [local, domain] = email.split('@');
+    if (!local || !domain) return '***';
+    return `${local.slice(0, 2)}***@${domain}`;
   }
 
   private async handleWelcome(job: Job<WelcomeJobData>): Promise<void> {
     const { to, firstName } = job.data;
-    this.logger.log(`Sending welcome email to ${to}`);
+    this.logger.log(`Sending welcome email to ${this.maskEmail(to)}`);
     const html = this.renderTemplate(EMAIL_JOBS.WELCOME, { firstName });
 
+    const fromAddress = this.appCfg.resendFrom;
     const { error } = await this.resend.emails.send({
-      from: `Energy IQ <no-reply@energyiq.com>`,
+      from: `Energy IQ <${fromAddress}>`,
       to,
       subject: `Welcome to Energy IQ`,
       html,
@@ -63,7 +71,7 @@ export class EmailProcessor extends WorkerHost {
 
     if (error) {
       this.logger.error(
-        `Welcome email failed for ${to}`,
+        `Welcome email failed for ${this.maskEmail(to)}`,
         error.name,
         error.message,
         error.statusCode,
@@ -71,18 +79,19 @@ export class EmailProcessor extends WorkerHost {
       throw new Error(error.message);
     }
 
-    this.logger.log(`Welcome email sent successfully to ${to}`);
+    this.logger.log(`Welcome email sent successfully to ${this.maskEmail(to)}`);
   }
 
   private async handlePasswordReset(
     job: Job<PasswordResetJobData>,
   ): Promise<void> {
     const { to, resetLink } = job.data;
-    this.logger.log(`Sending password reset email to ${to}`);
+    this.logger.log(`Sending password reset email to ${this.maskEmail(to)}`);
     const html = this.renderTemplate(EMAIL_JOBS.PASSWORD_RESET, { resetLink });
 
+    const fromAddress = this.appCfg.resendFrom;
     const { error } = await this.resend.emails.send({
-      from: `Energy IQ <no-reply@energyiq.com>`,
+      from: `Energy IQ <${fromAddress}>`,
       to,
       subject: 'Reset your password',
       html,
@@ -90,7 +99,7 @@ export class EmailProcessor extends WorkerHost {
 
     if (error) {
       this.logger.error(
-        `Password reset email failed for ${to}`,
+        `Password reset email failed for ${this.maskEmail(to)}`,
         error.name,
         error.message,
         error.statusCode,
@@ -98,20 +107,23 @@ export class EmailProcessor extends WorkerHost {
       throw new Error(error.message);
     }
 
-    this.logger.log(`Password reset email sent successfully to ${to}`);
+    this.logger.log(
+      `Password reset email sent successfully to ${this.maskEmail(to)}`,
+    );
   }
 
   private async handleVerifyEmail(job: Job<VerifyEmailJobData>): Promise<void> {
     const { to, verifyCode, fullName, clientUrl } = job.data;
-    this.logger.log(`Sending verify email to ${to}`);
+    this.logger.log(`Sending verify email to ${this.maskEmail(to)}`);
     const html = this.renderTemplate(EMAIL_JOBS.VERIFY_EMAIL, {
       verifyCode,
       fullName,
       clientUrl,
     });
 
+    const fromAddress = this.appCfg.resendFrom;
     const { error } = await this.resend.emails.send({
-      from: `Energy IQ <no-reply@energyiq.com>`,
+      from: `Energy IQ <${fromAddress}>`,
       to,
       subject: 'Verify your email address',
       html,
@@ -119,7 +131,7 @@ export class EmailProcessor extends WorkerHost {
 
     if (error) {
       this.logger.error(
-        `Verify email failed for ${to}`,
+        `Verify email failed for ${this.maskEmail(to)}`,
         error.name,
         error.message,
         error.statusCode,
@@ -127,7 +139,7 @@ export class EmailProcessor extends WorkerHost {
       throw new Error(error.message);
     }
 
-    this.logger.log(`Verify email sent successfully to ${to}`);
+    this.logger.log(`Verify email sent successfully to ${this.maskEmail(to)}`);
   }
 
   private renderTemplate(
