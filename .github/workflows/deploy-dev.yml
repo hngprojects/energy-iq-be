@@ -18,9 +18,9 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.DEV_SSH_HOST }}
-          username: ${{ secrets.DEV_SSH_USER }}
-          key: ${{ secrets.DEV_SSH_KEY }}
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
             cd ~/energy-iq-be
@@ -40,4 +40,4 @@ jobs:
       - name: Health check
         run: |
           sleep 10
-          curl --fail http://${{ secrets.DEV_SSH_HOST }}/health || exit 1
+          curl --fail http://${{ secrets.SERVER_IP }}/health || exit 1
