@@ -63,8 +63,6 @@ import { InvertersMetricsModule } from './modules/inverters-metrics/inverters-me
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
-    Service,
-    InvertersService,
   ],
 })
 export class AppModule {}
