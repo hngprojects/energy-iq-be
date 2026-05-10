@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: http://${{ secrets.SERVER_IP }}:3331
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
