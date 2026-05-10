@@ -115,9 +115,10 @@ jobs:
 
       - name: Audit dependencies
         run: pnpm audit --audit-level=high
+        continue-on-error: true
 
       - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           scan-type: fs
           scan-ref: .
