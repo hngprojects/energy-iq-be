@@ -97,6 +97,7 @@ export class AuthService {
     await this.usersService.setEmailVerified(user.id, true);
     await this.redis.delete(dto.email, 'otp');
     await this.redis.delete(attemptKey, 'otp_attempts');
+    await this.deleteVerificationResends(user);
 
     user.emailVerified = true;
     return this.toPublicUser(user);
@@ -106,15 +107,35 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new NotFoundException(SYS_MSG.USER_NOT_FOUND);
 
-    const attemptKey = `${dto.email}_resends`;
-    const attemptsRaw = await this.redis.get(attemptKey, 'otp_attempts');
-    const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : 0;
-    if (attempts >= 5)
+    const resendAttemptsKey = `${dto.email}`;
+    const resendAttemptsRaw = await this.redis.get(
+      resendAttemptsKey,
+      'otp_resend_attempts',
+    );
+    const resendAttempts = resendAttemptsRaw
+      ? Number.parseInt(resendAttemptsRaw, 10)
+      : 0;
+    if (resendAttempts >= 5)
       throw new UnauthorizedException(SYS_MSG.OTP_ATTEMPTS_EXCEEDED);
 
-    await this.redis.set(attemptKey, `${attempts + 1}`, 'otp_attempts', 900);
+    await this.redis.set(
+      resendAttemptsKey,
+      `${resendAttempts + 1}`,
+      'otp_resend_attempts',
+      900,
+    );
     await this.sendVerificationEmail(user);
     return this.toPublicUser(user);
+  }
+
+  private async deleteVerificationResends(user: User): Promise<Error | null> {
+    try {
+      const resendAttemptsKey = `${user.email}`;
+      await this.redis.delete(resendAttemptsKey, 'otp_resend_attempts');
+      return null;
+    } catch (err: any) {
+      return err as Error;
+    }
   }
 
   async refresh(refreshToken: string): Promise<AuthTokens> {
