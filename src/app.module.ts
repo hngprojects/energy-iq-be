@@ -9,26 +9,50 @@ import { appConfig } from './config/app.config';
 import { databaseConfig } from './config/database.config';
 import './config/env';
 import { jwtConfig } from './config/jwt.config';
+import { googleConfig } from './config/google.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { AppThrottlerGuard } from './common/guards/throttler.guard';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
 import { chatbotConfig } from './config/chatbot.config';
+import { EmailModule } from './modules/email/email.module';
+import { redisConfig } from './config/redis.config';
+import { BullModule } from '@nestjs/bullmq';
+import { bullConfig } from './config/queue.config';
+import { RedisModule } from './common/redis/redis.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, chatbotConfig, databaseConfig, jwtConfig],
+      load: [
+        appConfig,
+        chatbotConfig,
+        databaseConfig,
+        jwtConfig,
+        redisConfig,
+        googleConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => databaseConfig(),
     }),
+    BullModule.forRoot(bullConfig),
     HealthModule,
     UsersModule,
     AuthModule,
     ChatbotModule,
+    EmailModule,
+    RedisModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 60,
+      },
+    ]),
   ],
   providers: [
     {
@@ -41,6 +65,7 @@ import { chatbotConfig } from './config/chatbot.config';
       }),
     },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: AppThrottlerGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },

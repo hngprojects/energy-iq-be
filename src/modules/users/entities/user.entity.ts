@@ -9,7 +9,7 @@ export class User extends AbstractBaseEntity {
   email: string;
 
   @Exclude()
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   passwordHash: string;
 
   @Column({ type: 'varchar', length: 255 })
