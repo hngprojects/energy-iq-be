@@ -63,6 +63,7 @@ export class AuthController {
 
   @Public()
   @Get('google')
+  @HttpCode(HttpStatus.FOUND)
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth redirect' })
   googleAuth() {
@@ -71,13 +72,20 @@ export class AuthController {
 
   @Public()
   @Get('google/callback')
+  @HttpCode(HttpStatus.FOUND)
   @UseGuards(GoogleAuthGuard)
-  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiOperation({
+    summary: 'Google OAuth callback',
+    description:
+      'Handles the OAuth callback from Google. On success, redirects the browser to ' +
+      '`{CLIENT_URL}/onboarding#token=<accessToken>`. ' +
+      'The access token is passed as a URL fragment (after `#`), not a query parameter. ',
+  })
   googleCallback(
     @CurrentUser() authResponse: AuthResponse,
     @Res() res: Response,
   ) {
-    const redirectUrl = `${this.appCfg.clientUrl}/auth/callback`;
+    const redirectUrl = `${this.appCfg.clientUrl}/onboarding`;
 
     ValidateRedirectUrl(redirectUrl, this.appCfg.allowedRedirectOrigins);
 
