@@ -18,7 +18,12 @@ async function bootstrap() {
   const expressApp = app.getHttpAdapter().getInstance() as Express;
   expressApp.set('trust proxy', 1);
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginOpenerPolicy: false,
+    }),
+  );
   app.use(compression());
   app.enableCors({
     origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(','),
@@ -43,18 +48,15 @@ async function bootstrap() {
         'AI-powered energy management platform API for Nigerian SMEs and African businesses',
       )
       .setVersion(packageJson.version)
-      .addServer(`http://localhost:${env.PORT}`, 'Local Development')
-      .addServer('https://api.energyiq.example.com', 'Production')
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document, {
+    SwaggerModule.setup('api/docs', app, document, {
       swaggerOptions: {
         persistAuthorization: true,
         displayRequestDuration: true,
         deepLinking: true,
         filter: true,
-        tryItOutEnabled: false,
       },
     });
   }
@@ -71,7 +73,7 @@ async function bootstrap() {
   });
 
   if (env.SWAGGER_ENABLED)
-    logger.log(`Swagger docs: http://localhost:${env.PORT}/docs`);
+    logger.log(`Swagger docs: http://${env.HOST}:${env.PORT}/api/docs`);
 }
 
 void bootstrap();
