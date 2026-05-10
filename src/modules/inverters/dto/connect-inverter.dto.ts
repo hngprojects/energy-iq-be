@@ -15,6 +15,8 @@ export class ConnectInverterDto {
   brand: InverterBrand; // user's selection from the choose brand screen
 
   @IsString()
+  userId: string; // the ID of the user connecting the inverter
+  @IsString()
   @MinLength(10)
   accessToken: string; // the PAT supplied by the client from their VRM portal
 }

@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { GoogleOAuthDto } from '../auth/dto/google-oauth.dto';
 
 const BCRYPT_ROUNDS = 10;
 
@@ -28,10 +29,32 @@ export class UsersService {
       ...noTransaction(),
       createPayload: {
         email: dto.email,
-        password: passwordHash,
-        fullName: dto.fullName,
+        passwordHash: passwordHash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         role: dto.role,
       },
+    });
+  }
+
+  async findOrCreateByGoogle(dto: GoogleOAuthDto): Promise<User> {
+    const existing = await this.userModelAction.findByGoogleId(dto.googleId);
+    if (existing) return existing;
+
+    const existingByEmail = await this.userModelAction.findByEmail(dto.email);
+
+    if (
+      existingByEmail?.googleId &&
+      existingByEmail.googleId !== dto.googleId
+    ) {
+      throw new ConflictException(SYS_MSG.CONFLICTING_GOOGLE_ACCOUNT);
+    }
+
+    return this.userModelAction.upsertByGoogle({
+      email: dto.email,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      googleId: dto.googleId,
     });
   }
 
@@ -58,8 +81,6 @@ export class UsersService {
     await this.findOne(id);
 
     const payload: Partial<User> = { ...dto };
-    if (dto.password)
-      payload.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
     const updated = await this.userModelAction.update({
       ...noTransaction(),
@@ -85,6 +106,14 @@ export class UsersService {
       ...noTransaction(),
       identifierOptions: { id },
       updatePayload: { refreshTokenHash: hash },
+    });
+  }
+
+  async setEmailVerified(id: string, emailVerified: boolean): Promise<void> {
+    await this.userModelAction.update({
+      ...noTransaction(),
+      identifierOptions: { id },
+      updatePayload: { emailVerified },
     });
   }
 }

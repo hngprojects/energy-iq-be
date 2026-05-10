@@ -1,5 +1,4 @@
 // src/inverters/adapters/victron.adapter.ts
-
 import { Injectable, BadRequestException } from '@nestjs/common';
 import {
   MeResponse,
@@ -47,36 +46,16 @@ export class VictronAdapter {
     const site = data.records[0];
 
     return {
-      brandSystemId: String(site.idSite),
-      brandDeviceId: '255', // default instance
-      inverterModel: site.name ?? 'Victron System',
+      model: site.name, //  inverter.model
+      serialNumber: site.identifier, //  inverter.serialNumber
+      installationId: String(site.idSite), //  inverter.installationId
+      ratedCapacityKwh: site.pvMax //  pvMax is watts  convert
+        ? parseFloat((site.pvMax / 1000).toFixed(2))
+        : 0,
+      timezone: site.timezone,
+      isOnGrid: site.is_on_grid,
+      hasGenerator: Boolean(site.hasGenerator),
+      mqttHost: site.mqtt_host,
     };
   }
-
-  // Called every 60 seconds by the polling job
-  //   async fetchLiveMetrics(
-  //     idSite: string,
-  //     accessToken: string,
-  //   ): Promise<NormalizedMetric> {
-  //     const res = await fetch(
-  //       `${this.BASE}/installations/${idSite}/stats?type=live_feed`,
-  //       { headers: { 'X-Authorization': `Token ${accessToken}` } },
-  //     );
-
-  //     if (!res.ok) throw new Error(`Victron live_feed failed: ${res.status}`);
-
-  //     const data = await res.json();
-
-  //     // Normalize: map Victron field names → your standard schema columns
-  //     // Field names come from the VRM API response structure
-  //     return {
-  //       solarInputKw: data.Solar?.Power ?? null,
-  //       batteryLevel: data.Battery?.StateOfCharge ?? null,
-  //       realTimePowerOutputKw: data.Ac?.ConsumptionOnInput?.Power ?? null,
-  //       loadRatingKw: data.Ac?.ConsumptionOnOutput?.Power ?? null,
-  //       dcVoltage: data.Battery?.Voltage ?? null,
-  //       acVoltage: data.Ac?.Grid?.L1?.Voltage ?? null,
-  //       mpptEfficiency: data.Solar?.ChargerEfficiency ?? null,
-  //     };
-  //   }
 }

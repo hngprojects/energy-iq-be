@@ -1,6 +1,14 @@
 import { User } from '../entities/user.entity';
 
-export type PublicUser = Omit<
+export type UserResponse = Omit<
   User,
-  'password' | 'refreshTokenHash' | 'deletedAt'
+  'passwordHash' | 'refreshTokenHash' | 'deletedAt' | 'googleId'
 >;
+
+export type PublicUser = Pick<
+  UserResponse,
+  'id' | 'email' | 'firstName' | 'lastName' | 'role' | 'createdAt' | 'updatedAt'
+> & {
+  lastLoginAt: Date | undefined;
+  emailVerified: boolean;
+};

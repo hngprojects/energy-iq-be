@@ -13,14 +13,14 @@ export abstract class AbstractBaseEntity {
   id: string;
 
   @ApiProperty()
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
   @ApiProperty()
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
   @Exclude()
-  @DeleteDateColumn({ name: 'deleted_at' })
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz' })
   deletedAt: Date | null;
 }

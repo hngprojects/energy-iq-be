@@ -103,9 +103,14 @@ export interface NormalizedMetric {
 }
 
 export interface VerifiedSystem {
-  brandSystemId: string; // idSite from VRM
-  brandDeviceId: string; // instance number
-  inverterModel: string;
+  model: string; // inverter.model
+  serialNumber: string; // inverter.serialNumber (unique)
+  installationId: string; // inverter.installationId
+  ratedCapacityKwh: number; // inverter.ratedCapacityKwh
+  timezone: string; // store separately — needed for timestamp display
+  isOnGrid: boolean; // useful context for alerts
+  hasGenerator: boolean; // useful context for alerts
+  mqttHost: string; // needed for real-time updates later
 }
 export interface MeResponse {
   success: boolean;
