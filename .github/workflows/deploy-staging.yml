@@ -1,0 +1,114 @@
+name: Deploy — Staging
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging Server
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: http://${{ secrets.SERVER_IP }}:3331
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Deploy to staging via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -e
+
+            APP_DIR="/home/${{ secrets.SERVER_USER }}/backend/staging"
+            REPO="https://github.com/hngprojects/energy-iq-be.git"
+
+            echo "==> Ensuring app directory exists"
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
+
+            echo "==> Pulling latest code from staging branch"
+            if [ -d ".git" ]; then
+              git fetch origin
+              git reset --hard origin/staging
+            else
+              git clone --branch staging "$REPO" .
+            fi
+
+            echo "==> Installing pnpm if needed"
+            npm install -g pnpm@10 --silent
+
+            echo "==> Installing dependencies"
+            pnpm install --frozen-lockfile
+
+            echo "==> Building app"
+            pnpm build
+
+            echo "==> Writing .env"
+            cat > .env << 'ENVEOF'
+            NODE_ENV=staging
+            PORT=3331
+            HOST=0.0.0.0
+            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_SYNC=false
+            DATABASE_LOGGING=false
+            DATABASE_SSL=false
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            JWT_ACCESS_EXPIRES_IN=15m
+            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            JWT_REFRESH_EXPIRES_IN=7d
+            CORS_ORIGIN="${{ secrets.CORS_ORIGIN }}"
+            SWAGGER_ENABLED=true
+            ENVEOF
+
+            echo "==> Running database migrations"
+            pnpm migration:run
+
+            echo "==> Restarting app with PM2"
+            if pm2 list | grep -q "be-dev"; then
+              pm2 reload be-dev --update-env
+            else
+              pm2 start dist/main.js \
+                --name be-dev \
+                --env staging \
+                -i 1 \
+                --max-memory-restart 512M \
+                --restart-delay 3000
+            fi
+
+            pm2 save
+
+            echo "==> Staging deployment complete"
+            pm2 show be-dev
