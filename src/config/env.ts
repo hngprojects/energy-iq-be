@@ -7,7 +7,7 @@ dotenv.config();
 export const env = createEnv({
   server: {
     NODE_ENV: z
-      .enum(['development', 'test', 'production'])
+      .enum(['development', 'staging', 'production'])
       .default('development'),
     PORT: z.coerce.number().int().positive().default(3000),
     HOST: z.string().default('localhost'),
