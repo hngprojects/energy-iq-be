@@ -30,4 +30,6 @@ export const SYS_MSG = {
   INVALID_REDIRECT_URL: 'Invalid redirect URL',
   INVALID_REDIRECT_URL_PROTOCOL: 'Invalid redirect URL protocol',
   FORBIDDEN_REDIRECT_URL: 'Redirected URL origin not permitted',
+  UNVERIFIED_USER: 'The user email is not verified',
+  INVALID_TOKEN: 'The token is invalid',
 } as const;
