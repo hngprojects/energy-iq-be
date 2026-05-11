@@ -93,6 +93,22 @@ export class UsersService {
     return updated;
   }
 
+  async updatePasswordHash(id: string, passwordHash: string): Promise<User> {
+    await this.findOne(id);
+
+    const payload: Partial<User> = { passwordHash };
+
+    const updated = await this.userModelAction.update({
+      ...noTransaction(),
+      identifierOptions: { id },
+      updatePayload: payload,
+    });
+    if (!updated) {
+      throw new InternalServerErrorException(SYS_MSG.INTERNAL_SERVER_ERROR);
+    }
+    return updated;
+  }
+
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.userModelAction.delete({

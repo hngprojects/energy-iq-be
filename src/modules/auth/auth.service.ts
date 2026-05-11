@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   Inject,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -23,6 +24,9 @@ import * as OtpUtil from '../../common/utils/otp.util';
 import { RedisService } from '../../common/redis/redis.service';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { GoogleOAuthDto } from './dto/google-oauth.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { PasswordUtil } from '../../common/utils/password.util';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 export interface AuthTokens {
   accessToken: string;
@@ -114,14 +118,102 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new NotFoundException(SYS_MSG.USER_NOT_FOUND);
 
-    const attemptKey = `${dto.email}_resends`;
-    const attemptsRaw = await this.redis.get(attemptKey, 'otp_attempts');
+    const attemptKey = `${dto.email}`;
+    const attemptsRaw = await this.redis.get(attemptKey, 'otp_resend_attempts');
     const attempts = attemptsRaw ? Number.parseInt(attemptsRaw, 10) : 0;
     if (attempts >= 5)
       throw new UnauthorizedException(SYS_MSG.OTP_ATTEMPTS_EXCEEDED);
 
-    await this.redis.set(attemptKey, `${attempts + 1}`, 'otp_attempts', 900);
+    await this.redis.set(
+      attemptKey,
+      `${attempts + 1}`,
+      'otp_resend_attempts',
+      900,
+    );
     await this.sendVerificationEmail(user);
+    return this.toPublicUser(user);
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto) {
+    /**
+     * Steps to execute forgotPassword
+     *
+     * 1. ensure that a user exists with the email
+     * 2. ensure that the user is email verified
+     * 3. send password reset email
+     * 5. cache a password reset record
+     *
+     * Notes: Users that signed up with google should be able to attach passwords to their accounts (confirm that having a password will not break google auth)
+     */
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new UnauthorizedException(SYS_MSG.UNAUTHORIZED);
+
+    if (!user.emailVerified)
+      throw new UnauthorizedException(SYS_MSG.UNAUTHORIZED);
+
+    const token = await this.sendPasswordResetEmail(user);
+    console.log({ token, length: token.length });
+
+    const passwordResetKey = dto.email;
+    const uniqueKey = 'password_reset_token';
+    const tokenHash = await bcrypt.hash(token, 10);
+    await this.redis.set(passwordResetKey, tokenHash, uniqueKey, 300);
+
+    return dto;
+  }
+
+  async sendPasswordResetEmail(user: User): Promise<string> {
+    let clientUrl = this.appCfg.clientUrl;
+    if (clientUrl.endsWith('/')) {
+      clientUrl = clientUrl.substring(0, clientUrl.length - 1);
+    }
+    const token = PasswordUtil.generateResetToken();
+    const resetLink = `${clientUrl}/reset-password?token=${token}`;
+    await this.emailService.sendPasswordReset(
+      user.email,
+      resetLink,
+      user.firstName,
+    );
+    return token;
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    /**
+     * Steps to execute resetPassword
+     *
+     * 1. ensure that a password reset record exists with this email
+     * 2. ensure that a user exists with this email
+     * 3. ensure that the user's email is verified
+     * 4. update the user's password hash
+     * 5. return a success response
+     */
+    const passwordResetKey = `${dto.email}`;
+    const tokenHash = await this.redis.get(
+      passwordResetKey,
+      'password_reset_token',
+    );
+    if (!tokenHash) throw new ForbiddenException(SYS_MSG.FORBIDDEN);
+
+    const matches = await bcrypt.compare(dto.token, tokenHash);
+    if (!matches) throw new UnauthorizedException(SYS_MSG.INVALID_TOKEN);
+
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new ForbiddenException(SYS_MSG.INVALID_CREDENTIALS);
+
+    if (!user.emailVerified)
+      throw new ForbiddenException(SYS_MSG.UNVERIFIED_USER);
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+    await this.usersService.updatePasswordHash(user.id, passwordHash);
+
+    await this.emailService.sendPasswordUpdate(
+      user.email,
+      this.appCfg.clientUrl,
+      user.firstName,
+    );
+
+    await this.redis.delete(`${dto.email}`, 'password_reset_token');
+
     return this.toPublicUser(user);
   }
 
