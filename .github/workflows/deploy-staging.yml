@@ -1,14 +1,14 @@
-name: Deploy to Dev
+name: Deploy to Staging
 
 on:
   push:
     branches:
-      - dev
+      - staging
   workflow_dispatch:
 
 jobs:
   deploy:
-    name: Deploy to Dev Server
+    name: Deploy to Staging Server
     runs-on: ubuntu-latest
 
     steps:
@@ -25,11 +25,11 @@ jobs:
             set -e
             cd ~/energy-iq-be
 
-            git pull origin dev
+            git pull origin staging
 
             # Create .env from secrets
             cat > .env << EOF
-            NODE_ENV=production
+            NODE_ENV=staging
             PORT=3330
             HOST=0.0.0.0
             CLIENT_URL=${{ secrets.CLIENT_URL }}
@@ -71,7 +71,7 @@ jobs:
             pnpm migration:run
             pnpm build
 
-            pm2 reload energy-iq-dev --update-env || pm2 start dist/main.js --name energy-iq-dev
+            pm2 reload energy-iq-staging --update-env || pm2 start dist/main.js --name energy-iq-staging
             pm2 save
 
       - name: Health check
