@@ -24,9 +24,12 @@ export class InvertersService {
     private readonly inverterModelAction: InverterModelAction,
   ) {}
 
-  async connectInverter(dto: InverterConnectorDto): Promise<Inverter> {
+  async connectInverter(
+    dto: InverterConnectorDto,
+    userId: string,
+  ): Promise<Inverter> {
     if (dto.brand === InverterBrand.VICTRON) {
-      return await this.connectVictronInverter(dto);
+      return await this.connectVictronInverter(dto, userId);
     } else if (dto.brand === InverterBrand.GROWATT) {
       throw new NotImplementedException();
     } else if (dto.brand === InverterBrand.SUNSYNK) {
@@ -38,8 +41,11 @@ export class InvertersService {
     );
   }
 
-  async connectVictronInverter(dto: InverterConnectorDto): Promise<Inverter> {
-    const { victronAccessToken, userId } = dto;
+  async connectVictronInverter(
+    dto: InverterConnectorDto,
+    userId: string,
+  ): Promise<Inverter> {
+    const { victronAccessToken } = dto;
     // verify with VRM and get back the mapped fields
     const systemData =
       await this.victronAdapter.verifyAndGetSystem(victronAccessToken);

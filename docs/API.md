@@ -9,6 +9,11 @@ All protected endpoints require a Bearer token in the `Authorization` header:
 Authorization: Bearer <accessToken>
 ```
 
+Common onboarding flow:
+1. Register an account
+2. Verify the email address
+3. Connect an inverter
+
 ---
 
 ## Health
@@ -206,7 +211,7 @@ List all users (paginated).
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `page` | number | 1 | Page number |
-| `limit` | number | 10 | Items per page |
+| `limit` | number | 20 | Items per page |
 
 **Response `200`**
 
@@ -242,14 +247,15 @@ Delete a user.
 
 ---
 
-### `POST /users/onboarding`
-Connect a user's inverter during onboarding.
+### `POST /users/onboard`
+Connect the current user's inverter during onboarding.
+
+🔒 **Protected**. Uses the authenticated user's id from the access token.
 
 **Request body**
 ```json
 {
   "brand": "VICTRON",
-  "userId": "uuid",
   "victronAccessToken": "victron-vrm-personal-access-token"
 }
 ```
@@ -260,14 +266,19 @@ Supported brands: `VICTRON`, `GROWATT`, `SUNSYNK`
 
 ---
 
-### `GET /users/onboarding/status`
+### `GET /users/onboard/status`
 🔒 **Protected**. Get the current user's onboarding step and completion status.
 
 **Response `200`**
 ```json
 {
-  "onboardingStep": 2,
-  "onboardingComplete": false
+  "currentStep": 2,
+  "onboardingComplete": false,
+  "steps": {
+    "accountCreated": true,
+    "emailVerified": true,
+    "inverterConnected": false
+  }
 }
 ```
 
@@ -282,7 +293,7 @@ Get the list of supported inverter brands.
 
 **Response `200`**
 ```json
-["VICTRON", "GROWATT", "SUNSYNK"]
+["VICTRON", "GROWATT", "DEYE", "SUNSYNK"]
 ```
 
 ---
