@@ -33,15 +33,18 @@ export class UsersController {
 
   @Post('onboard')
   @ApiOperation({ summary: 'Connect user inverter brand' })
-  connectInverter(@Body() dto: InverterConnectorDto) {
+  connectInverter(
+    @Body() dto: InverterConnectorDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.usersService.connectUserInverter(
       dto.brand,
-      dto.userId,
       dto.victronAccessToken,
+      user.sub,
     );
   }
 
-  @Get('onboarding/status')
+  @Get('onboard/status')
   @ApiOperation({ summary: 'Get onboarding step and completion status' })
   getOnboardingStatus(@CurrentUser() user: AuthenticatedUser) {
     return this.usersService.getOnboardingStatus(user.sub);
