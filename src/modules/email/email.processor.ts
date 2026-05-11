@@ -6,7 +6,9 @@ import { type ConfigType } from '@nestjs/config';
 import { Job } from 'bullmq';
 import {
   EMAIL_JOBS,
+  LinkExpiredJobData,
   PasswordResetJobData,
+  PasswordUpdateJobData,
   VerifyEmailJobData,
   WelcomeJobData,
 } from './email.jobs';
@@ -42,6 +44,10 @@ export class EmailProcessor extends WorkerHost {
         return this.handlePasswordReset(job as Job<PasswordResetJobData>);
       case EMAIL_JOBS.VERIFY_EMAIL:
         return this.handleVerifyEmail(job as Job<VerifyEmailJobData>);
+      case EMAIL_JOBS.PASSWORD_UPDATE:
+        return this.handlePasswordUpdate(job as Job<PasswordUpdateJobData>);
+      case EMAIL_JOBS.LINK_EXPIRE:
+        return this.handleLinkExpire(job as Job<LinkExpiredJobData>);
       default: {
         const message = `Unknown job type: ${job.name}`;
         this.logger.warn(message);
@@ -57,9 +63,12 @@ export class EmailProcessor extends WorkerHost {
   }
 
   private async handleWelcome(job: Job<WelcomeJobData>): Promise<void> {
-    const { to, firstName } = job.data;
+    const { to, firstName, clientUrl } = job.data;
     this.logger.log(`Sending welcome email to ${this.maskEmail(to)}`);
-    const html = this.renderTemplate(EMAIL_JOBS.WELCOME, { firstName });
+    const html = this.renderTemplate(EMAIL_JOBS.WELCOME, {
+      firstName,
+      clientUrl,
+    });
 
     const fromAddress = this.appCfg.resendFrom;
     const { error } = await this.resend.emails.send({
@@ -85,9 +94,12 @@ export class EmailProcessor extends WorkerHost {
   private async handlePasswordReset(
     job: Job<PasswordResetJobData>,
   ): Promise<void> {
-    const { to, resetLink } = job.data;
+    const { to, firstName, resetLink } = job.data;
     this.logger.log(`Sending password reset email to ${this.maskEmail(to)}`);
-    const html = this.renderTemplate(EMAIL_JOBS.PASSWORD_RESET, { resetLink });
+    const html = this.renderTemplate(EMAIL_JOBS.PASSWORD_RESET, {
+      firstName,
+      resetLink,
+    });
 
     const fromAddress = this.appCfg.resendFrom;
     const { error } = await this.resend.emails.send({
@@ -112,13 +124,45 @@ export class EmailProcessor extends WorkerHost {
     );
   }
 
+  private async handlePasswordUpdate(
+    job: Job<PasswordUpdateJobData>,
+  ): Promise<void> {
+    const { to, firstName, clientUrl } = job.data;
+    this.logger.log(`Sending password update email to ${this.maskEmail(to)}`);
+    const html = this.renderTemplate(EMAIL_JOBS.PASSWORD_UPDATE, {
+      firstName,
+      clientUrl,
+    });
+
+    const fromAddress = this.appCfg.resendFrom;
+    const { error } = await this.resend.emails.send({
+      from: `Energy IQ <${fromAddress}>`,
+      to,
+      subject: 'Password Updated Successfully',
+      html,
+    });
+
+    if (error) {
+      this.logger.error(
+        `Password update email failed for ${this.maskEmail(to)}`,
+        error.name,
+        error.message,
+        error.statusCode,
+      );
+      throw new Error(error.message);
+    }
+
+    this.logger.log(
+      `Password Update email sent successfully to ${this.maskEmail(to)}`,
+    );
+  }
+
   private async handleVerifyEmail(job: Job<VerifyEmailJobData>): Promise<void> {
-    const { to, verifyCode, fullName, clientUrl } = job.data;
+    const { to, verifyCode, firstName } = job.data;
     this.logger.log(`Sending verify email to ${this.maskEmail(to)}`);
     const html = this.renderTemplate(EMAIL_JOBS.VERIFY_EMAIL, {
       verifyCode,
-      fullName,
-      clientUrl,
+      firstName,
     });
 
     const fromAddress = this.appCfg.resendFrom;
@@ -140,6 +184,37 @@ export class EmailProcessor extends WorkerHost {
     }
 
     this.logger.log(`Verify email sent successfully to ${this.maskEmail(to)}`);
+  }
+
+  private async handleLinkExpire(job: Job<LinkExpiredJobData>): Promise<void> {
+    const { to, firstName, requestUrl } = job.data;
+    this.logger.log(`Sending link expire email to ${this.maskEmail(to)}`);
+    const html = this.renderTemplate(EMAIL_JOBS.LINK_EXPIRE, {
+      firstName,
+      requestUrl,
+    });
+
+    const fromAddress = this.appCfg.resendFrom;
+    const { error } = await this.resend.emails.send({
+      from: `Energy IQ<${fromAddress}>`,
+      to,
+      subject: 'Link expired',
+      html,
+    });
+
+    if (error) {
+      this.logger.error(
+        `Link expire email failed for ${this.maskEmail(to)}`,
+        error.name,
+        error.message,
+        error.statusCode,
+      );
+      throw new Error(error.message);
+    }
+
+    this.logger.log(
+      `Link expire email sent successfully to ${this.maskEmail(to)}`,
+    );
   }
 
   private renderTemplate(
