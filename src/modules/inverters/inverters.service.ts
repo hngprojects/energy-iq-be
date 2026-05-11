@@ -1,44 +1,54 @@
-import { Injectable, ConflictException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import {
-  ConnectInverterDto,
-  InverterBrand as DtoInverterBrand,
-} from './dto/connect-inverter.dto';
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InverterConnectorDto } from './dto/inverter-connector.dto';
 import { VictronAdapter } from './adapters/victron.adapters';
 import { Inverter } from './entities/inverters.entity';
+import { InverterModelAction } from './action/inverters.action';
 import {
   InverterApiType,
   InverterBrand as EntityInverterBrand,
+  InverterBrand,
 } from '../../common/enums/inverter-brand.enums';
 import { SecretManager } from '../../common/utils/crypto.util';
+import { noTransaction } from '../../common/constants/transaction-options';
+import { SYS_MSG } from '../../common/constants/sys-msg';
+
 @Injectable()
 export class InvertersService {
   constructor(
     private victronAdapter: VictronAdapter,
-    @InjectRepository(Inverter)
-    private systemRepo: Repository<Inverter>,
+    private readonly inverterModelAction: InverterModelAction,
   ) {}
 
-  async connectInverter(dto: ConnectInverterDto): Promise<{ message: string }> {
-    if (dto.brand === DtoInverterBrand.VICTRON) {
-      const { accessToken, userId } = dto;
-      // verify with VRM and get back the mapped fields
-      const systemData =
-        await this.victronAdapter.verifyAndGetSystem(accessToken);
-      const existing = await this.systemRepo.findOne({
-        where: { serialNumber: systemData.serialNumber },
-      });
-      if (existing) {
-        throw new ConflictException(
-          'This Victron installation is already connected to an account.',
-        );
-      }
-      // encrypt the token before touching the DB
-      const encryptedCredentials = SecretManager.encrypt(accessToken);
+  async connectInverter(dto: InverterConnectorDto): Promise<Inverter> {
+    if (dto.brand === InverterBrand.VICTRON)
+      await this.connectVictronInverter(dto);
 
-      // create record in DB and persist
-      const newSystem = this.systemRepo.create({
+    throw new ConflictException(`Unsupported inverter brand: ${dto.brand}`);
+  }
+
+  async connectVictronInverter(dto: InverterConnectorDto): Promise<Inverter> {
+    const { accessToken, userId } = dto;
+    // verify with VRM and get back the mapped fields
+    const systemData =
+      await this.victronAdapter.verifyAndGetSystem(accessToken);
+    const existing = await this.inverterModelAction.findBySerialNumber(
+      systemData.serialNumber,
+    );
+    if (existing)
+      throw new ConflictException(
+        'This Victron installation is already connected to an account.',
+      );
+    // encrypt the token before touching the DB
+    const encryptedCredentials = SecretManager.encrypt(accessToken);
+
+    // create record in DB and persist
+    return this.inverterModelAction.create({
+      ...noTransaction(),
+      createPayload: {
         userId,
         model: systemData.model,
         brand: EntityInverterBrand.VICTRON,
@@ -47,21 +57,25 @@ export class InvertersService {
         ratedCapacityKwh: systemData.ratedCapacityKwh,
         apiType: InverterApiType.LIVE_API,
         encryptedCredentials,
-      });
-
-      await this.systemRepo.save(newSystem);
-
-      return { message: 'Victron inverter connected successfully' };
-    }
-
-    // unsupported brand
-    throw new ConflictException(`Unsupported inverter brand: ${dto.brand}`);
-  }
-  findOne(id: string) {
-    return { id, message: 'Inverter coming soon' };
+      },
+    });
   }
 
-  findByUser(userId: string) {
-    return { userId, message: 'User inverters coming soon' };
+  async findByUserId(userId: string): Promise<Inverter[]> {
+    const inverters = await this.inverterModelAction.findByUserId(userId);
+    if (!inverters?.length) throw new NotFoundException(SYS_MSG.NOT_FOUND);
+    return inverters;
+  }
+
+  async findOne(id: string): Promise<Inverter> {
+    const inverter = await this.inverterModelAction.get({
+      identifierOptions: { id },
+    });
+    if (!inverter) throw new NotFoundException(SYS_MSG.NOT_FOUND);
+    return inverter;
+  }
+
+  getSupportedInverterBrands(): InverterBrand[] {
+    return Object.values(InverterBrand);
   }
 }

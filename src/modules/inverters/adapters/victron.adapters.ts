@@ -1,11 +1,8 @@
-// src/inverters/adapters/victron.adapter.ts
 import { Injectable, BadRequestException } from '@nestjs/common';
 import {
   MeResponse,
-  //   NormalizedMetric,
   VerifiedSystem,
   VictronInstallationsResponse,
-  //   VictronInstallation,
 } from '../types';
 
 @Injectable()

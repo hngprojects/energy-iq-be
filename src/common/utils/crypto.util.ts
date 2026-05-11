@@ -6,9 +6,9 @@ export class SecretManager {
 
   private static getKey(): Buffer {
     const key = process.env.ENCRYPTION_KEY;
-    if (!key || key.length < 32) {
+    if (!key || key.length < 32)
       throw new Error('ENCRYPTION_KEY must be at least 32 characters');
-    }
+
     return Buffer.from(key, 'utf8').subarray(0, 32); // ensure 32 bytes
   }
 
