@@ -81,9 +81,7 @@
 
         }
 
-        .top-content {
-            gap: 8px;
-        }
+
 
         .sub-title {
             font-size: 24px;
@@ -110,6 +108,7 @@
 
         .item-content {
             gap: 5px;
+
             line-height: 1;
         }
 
@@ -117,16 +116,20 @@
             font-size: 16px;
         }
 
-        .code {
-            display: flex;
-            align-items: center;
-            width: 634px;
-            height: 61px;
-            font-weight: 700;
-        }
-
-        .code p {
-            font-size: 48px;
+        .bottom-button {
+            display: block;
+            background-color: #111928;
+            color: #F6F6F6;
+            height: 54px;
+            width: 100%;
+            border-radius: 10px;
+            padding: 0 32px;
+            gap: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            margin-top: 16px;
         }
 
         .bottom-content {
@@ -193,16 +196,18 @@
                 padding: 12px;
             }
 
-            .middle-content {
-                padding: 16px;
-            }
-
             .sub-title {
                 font-size: 20px;
             }
 
             p {
                 font-size: 14px;
+            }
+
+            .bottom-button {
+                height: 48px;
+                font-size: 14px;
+                padding: 0 20px;
             }
 
             .bottom-content {
@@ -251,59 +256,58 @@
         </div>
         <div class="main-section">
             <div class="main-icon">
-                <img src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778427951/mail_szjxdk.svg" alt="mail-icon" />
+                <img src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778427951/link_m9mnnm.svg" alt="link-icon" />
             </div>
 
             <div class="content">
                 <div class="title">
-                    <h1>Email Verification</h1>
+                    <h1>The link has expired</h1>
                 </div>
                 <div class="top-content">
                     <h2 class="sub-title">Hi <span id="name">{{firstName}}</span>,</h2>
-                    <p>Thanks for signing up for ENERGYIQ! Use the verification code below to confirm your email address
+                    <p>Your password reset has expired or has already been used
                     </p>
                 </div>
-                <div class="code">
-                    <p>{{verifyCode}}</p>
+                <div>
+                    <button class="bottom-button"><a href="{{requestUrl}}">Request New Link</a></button>
                 </div>
                 <div class="item-content">
-                    <p>This code will expire in 5 minutes. Enter this code in the app to complete your account setup.
-                    </p>
+                    <p>For security reasons, password reset links expire after 10 minutes and can only be used once.</p>
                 </div>
                 <div class="item-content">
                     <p style="font-weight:600;">Didn’t create an account?</p>
-                    <p>If you didn’t create an account with EnergyIQ, you can kindly ignore this email.</p>
+                    <p>If you didn’t request a password reset, you can safely ignore this email.</p>
                 </div>
                 <div class="bottom-content">
-                    <div class="bottom-content">
-                        <p>Regards, </br>
-                            The EnergyIQ Team
-                        </p>
-                    </div>
+                    <p>Regards, </p>
+                    <p>The EnergyIQ Team</p>
+
                 </div>
             </div>
-            <footer class="footer">
-                <div class="footer-icons">
-                    <img class="facebook"
-                        src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/facebook_llfkvr.svg"
-                        alt="facebook" />
-                    <img class="in" src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/in_p7abpg.svg"
-                        alt="linkedin" />
-                    <img class="x" src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441115/x_wlwnww.svg"
-                        alt="x" />
-                    <img class="discord"
-                        src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/discord_fcivey.svg"
-                        alt="discord" />
-                    <img class="mail"
-                        src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778443756/mail-small_le1rgp.svg"
-                        alt="mail" />
-                </div>
-                <div class="footer-content">
-                    <p>© 2025 EnergyIQ. All rights reserved.</p>
-                    <p>This is an automated email, please do not reply.</p>
-                </div>
-            </footer>
         </div>
+        <footer class="footer">
+            <div class="footer-icons">
+                <img class="facebook"
+                    src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/facebook_llfkvr.svg"
+                    alt="facebook" />
+                <img class="in" src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/in_p7abpg.svg"
+                    alt="linkedin" />
+                <img class="x" src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441115/x_wlwnww.svg"
+                    alt="x" />
+                <img class="discord"
+                    src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/discord_fcivey.svg"
+                    alt="discord" />
+                <img class="mail"
+                    src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778443756/mail-small_le1rgp.svg"
+                    alt="mail" />
+            </div>
+            <div class="footer-content">
+                <p>© 2025 EnergyIQ. All rights reserved.</p>
+                <p>This is an automated email, please do not reply.</p>
+            </div>
+        </footer>
+    </div>
+
 </body>
 
 </html>
