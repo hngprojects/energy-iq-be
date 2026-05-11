@@ -1,0 +1,80 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Staging Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            cd ~/energy-iq-be
+
+            git pull origin staging
+
+            # Create .env from secrets
+            cat > .env << EOF
+            NODE_ENV=staging
+            PORT=3330
+            HOST=0.0.0.0
+            CLIENT_URL=${{ secrets.CLIENT_URL }}
+            ALLOWED_REDIRECT_ORIGINS=${{ secrets.ALLOWED_REDIRECT_ORIGINS }}
+
+            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            DATABASE_PORT=5432
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_SYNC=false
+            DATABASE_LOGGING=false
+            DATABASE_SSL=false
+
+            REDIS_HOST=localhost
+            REDIS_PORT=6379
+            REDIS_DEFAULT_TTL=900
+
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            RESEND_FROM=energyiq@hng14.com
+
+            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            JWT_ACCESS_EXPIRES_IN=15m
+            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            JWT_REFRESH_EXPIRES_IN=7d
+
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+
+            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+            SWAGGER_ENABLED=false
+            EOF
+
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            pnpm install --frozen-lockfile
+            pnpm migration:run
+            pnpm build
+
+            pm2 reload energy-iq-staging --update-env || pm2 start dist/main.js --name energy-iq-staging
+            pm2 save
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl --fail http://${{ secrets.SERVER_IP }}/health || exit 1
