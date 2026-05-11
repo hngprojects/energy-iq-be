@@ -10,7 +10,9 @@ on:
     branches:
       - dev
   workflow_dispatch:
-
+  permissions:
+    contents: read
+  
 jobs:
   ci:
     name: Lint → Test → Build
@@ -43,15 +45,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d
         with:
           version: 10
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 20
           cache: pnpm
@@ -67,7 +69,6 @@ jobs:
           NODE_ENV: test
           PORT: 3330
           HOST: localhost
-          CLIENT_URL: http://localhost:3000
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
           DATABASE_USER: energy_iq_user
@@ -96,16 +97,16 @@ jobs:
     needs: ci
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d
         with:
           version: 10
 
       - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 20
           cache: pnpm
@@ -118,7 +119,7 @@ jobs:
         continue-on-error: true
 
       - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           scan-type: fs
           scan-ref: .
