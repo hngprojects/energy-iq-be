@@ -35,6 +35,13 @@ export class UsersController {
     return this.usersService.getOnboardingStatus(user.sub);
   }
 
+  @Get('me')
+  @ApiOperation({ summary: 'Get the current user using auth headers' })
+  @ApiBearerAuth()
+  getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.findOne(user.sub);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by id' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
