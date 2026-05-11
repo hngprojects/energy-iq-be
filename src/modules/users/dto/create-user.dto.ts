@@ -21,11 +21,17 @@ export class CreateUserDto {
   @MaxLength(128)
   password: string;
 
-  @ApiProperty({ example: 'Jane Doe' })
+  @ApiProperty({ example: 'Jane' })
   @IsString()
   @MinLength(1)
   @MaxLength(255)
-  fullName: string;
+  firstName: string;
+
+  @ApiProperty({ example: 'Doe' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(255)
+  lastName: string;
 
   @ApiProperty({ enum: UserRole, required: false, default: UserRole.USER })
   @IsOptional()

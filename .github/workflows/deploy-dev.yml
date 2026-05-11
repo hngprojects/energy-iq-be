@@ -1,0 +1,45 @@
+name: Deploy to Dev
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Dev Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            sudo -u appuser bash -c '
+              cd /home/appuser/backend/staging/energy-iq-be
+
+              git pull origin dev
+
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+              pnpm install --frozen-lockfile
+              pnpm migration:run
+              pnpm build
+
+              pm2 reload be-dev --update-env || pm2 start dist/main.js --name be-dev
+              pm2 save
+            '
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl --fail --max-time 15 https://api.staging.energy-iq.hng14.com/health || exit 1

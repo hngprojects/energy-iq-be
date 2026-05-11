@@ -5,17 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { noTransaction } from '../../common/constants/transaction-options';
 import { SYS_MSG } from '../../common/constants/sys-msg';
 import { UserModelAction } from './actions/user.action';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { GoogleOAuthDto } from '../auth/dto/google-oauth.dto';
 
 const BCRYPT_ROUNDS = 10;
-const NO_TRANSACTION = {
-  transactionOptions: { useTransaction: false as const },
-};
 
 @Injectable()
 export class UsersService {
@@ -27,13 +26,35 @@ export class UsersService {
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     return this.userModelAction.create({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
       createPayload: {
         email: dto.email,
-        password: passwordHash,
-        fullName: dto.fullName,
+        passwordHash: passwordHash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         role: dto.role,
       },
+    });
+  }
+
+  async findOrCreateByGoogle(dto: GoogleOAuthDto): Promise<User> {
+    const existing = await this.userModelAction.findByGoogleId(dto.googleId);
+    if (existing) return existing;
+
+    const existingByEmail = await this.userModelAction.findByEmail(dto.email);
+
+    if (
+      existingByEmail?.googleId &&
+      existingByEmail.googleId !== dto.googleId
+    ) {
+      throw new ConflictException(SYS_MSG.CONFLICTING_GOOGLE_ACCOUNT);
+    }
+
+    return this.userModelAction.upsertByGoogle({
+      email: dto.email,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      googleId: dto.googleId,
     });
   }
 
@@ -60,11 +81,25 @@ export class UsersService {
     await this.findOne(id);
 
     const payload: Partial<User> = { ...dto };
-    if (dto.password)
-      payload.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
     const updated = await this.userModelAction.update({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
+      identifierOptions: { id },
+      updatePayload: payload,
+    });
+    if (!updated) {
+      throw new InternalServerErrorException(SYS_MSG.INTERNAL_SERVER_ERROR);
+    }
+    return updated;
+  }
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<User> {
+    await this.findOne(id);
+
+    const payload: Partial<User> = { passwordHash };
+
+    const updated = await this.userModelAction.update({
+      ...noTransaction(),
       identifierOptions: { id },
       updatePayload: payload,
     });
@@ -77,16 +112,39 @@ export class UsersService {
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.userModelAction.delete({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
       identifierOptions: { id },
     });
   }
 
   async setRefreshTokenHash(id: string, hash: string | null): Promise<void> {
     await this.userModelAction.update({
-      ...NO_TRANSACTION,
+      ...noTransaction(),
       identifierOptions: { id },
       updatePayload: { refreshTokenHash: hash },
     });
+  }
+
+  async setEmailVerified(id: string, emailVerified: boolean): Promise<void> {
+    await this.userModelAction.update({
+      ...noTransaction(),
+      identifierOptions: { id },
+      updatePayload: { emailVerified },
+    });
+  }
+
+  async getOnboardingStatus(id: string) {
+    const user = await this.findOne(id);
+
+    return {
+      currentStep: user.onboardingStep ?? 1,
+      onboardingComplete: user.onboardingComplete,
+      steps: {
+        accountCreated: true,
+        emailVerified: user.emailVerified,
+        brandSelected: !!user.inverterBrand,
+        inverterConnected: user.onboardingComplete,
+      },
+    };
   }
 }

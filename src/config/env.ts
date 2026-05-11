@@ -7,10 +7,12 @@ dotenv.config();
 export const env = createEnv({
   server: {
     NODE_ENV: z
-      .enum(['development', 'test', 'production'])
+      .enum(['development', 'staging', 'production'])
       .default('development'),
     PORT: z.coerce.number().int().positive().default(3000),
     HOST: z.string().default('localhost'),
+    CLIENT_URL: z.url().default('http://localhost:3000'),
+    ALLOWED_REDIRECT_ORIGINS: z.string().default('http://localhost:3000,'), // add origins and separate with comma
 
     DATABASE_HOST: z.string().min(1),
     DATABASE_PORT: z.coerce.number().int().positive().default(5432),
@@ -30,6 +32,13 @@ export const env = createEnv({
       .default(false)
       .transform((v) => v === true || v === 'true'),
 
+    REDIS_HOST: z.string().default('localhost'),
+    REDIS_PORT: z.coerce.number().int().positive().default(6379),
+    REDIS_DEFAULT_TTL: z.coerce.number().int().positive().default(900),
+
+    RESEND_API_KEY: z.string().min(1),
+    RESEND_FROM: z.string().email().default('energyiq@hng14.com'),
+
     JWT_ACCESS_SECRET: z
       .string()
       .min(32, 'JWT_ACCESS_SECRET must be at least 32 chars'),
@@ -38,6 +47,10 @@ export const env = createEnv({
       .string()
       .min(32, 'JWT_REFRESH_SECRET must be at least 32 chars'),
     JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
+    GOOGLE_CALLBACK_URL: z.url(),
 
     CORS_ORIGIN: z.string().default('*'),
     SWAGGER_ENABLED: z

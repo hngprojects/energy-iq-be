@@ -18,9 +18,11 @@ export const userSeeder: Seeder = {
 
     const admin = repository.create({
       email: adminEmail,
-      password: await bcrypt.hash('Admin@123456', 10),
-      fullName: 'Admin User',
+      passwordHash: await bcrypt.hash('Admin@123456', 10),
       role: UserRole.ADMIN,
+      firstName: 'Admin',
+      lastName: 'User',
+      emailVerified: true,
     });
     await repository.save(admin);
 

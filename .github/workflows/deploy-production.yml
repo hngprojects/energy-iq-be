@@ -1,0 +1,45 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            sudo -u appuser bash -c '
+              cd /home/appuser/backend/production
+
+              git pull origin main
+
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+              pnpm install --frozen-lockfile
+              pnpm migration:run
+              pnpm build
+
+              pm2 reload be-prod --update-env || pm2 start dist/main.js --name be-prod
+              pm2 save
+            '
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl --fail --max-time 15 https://api.energy-iq.hng14.com/health || exit 1

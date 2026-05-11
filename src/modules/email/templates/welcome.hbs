@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+        rel="stylesheet">
+    <title>Email Template</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            position: relative;
+            background-color: white;
+            max-width: 791px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            width: 21.33px;
+            height: 21.33px;
+        }
+
+        .main-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-icon {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            margin-top: 86px;
+            text-align: center;
+        }
+
+        .main-icon img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 36;
+            text-align: center;
+            font-weight: 700;
+            max-width: 634px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 634px;
+            padding: 20px;
+            gap: 16px;
+        }
+
+        .top-content {
+            gap: 8px;
+        }
+
+        .sub-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .middle-content {
+            background-color: #F8FAF7;
+            padding: 20px;
+            width: 100%;
+            border-radius: 8px;
+            gap: 16px;
+        }
+
+        .item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .item img {
+            flex-shrink: 0;
+        }
+
+        .item-content {
+            gap: 5px;
+            padding: 0 10px;
+            line-height: 1;
+        }
+
+        p {
+            font-size: 16px;
+        }
+
+        .bottom-button {
+            display: block;
+            background-color: #111928;
+            color: #F6F6F6;
+            height: 54px;
+            width: 100%;
+            border-radius: 10px;
+            padding: 0 32px;
+            gap: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            margin-top: 16px;
+        }
+
+        .bottom-content {
+            width: 100%;
+            max-width: 555px;
+            font-size: 16px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 791px;
+            padding: 20px;
+            margin-top: 40px;
+            background-color: #D8DBE2;
+        }
+
+        .footer-icons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .footer-icons img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .footer-content {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            text-align: center;
+            max-width: 356px;
+            width: 100%;
+        }
+
+        .footer-content p {
+            margin: 4px 0;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media only screen and (max-width: 640px) {
+            .email-container {
+                padding: 12px;
+            }
+
+            .title {
+                font-size: 24px;
+                height: auto;
+            }
+
+            .main-icon {
+                margin-top: 40px;
+            }
+
+            .content {
+                margin-top: 60px;
+                padding: 12px;
+            }
+
+            .middle-content {
+                padding: 16px;
+            }
+
+            .sub-title {
+                font-size: 20px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+
+            .bottom-button {
+                height: 48px;
+                font-size: 14px;
+                padding: 0 20px;
+            }
+
+            .bottom-content {
+                font-size: 14px;
+            }
+
+            .footer {
+                padding: 16px;
+                margin-top: 24px;
+            }
+
+            .footer-content {
+                font-size: 14px;
+            }
+        }
+
+        @media only screen and (max-width: 400px) {
+            .title {
+                font-size: 20px;
+            }
+
+            .content {
+                margin-top: 40px;
+            }
+
+            .item {
+                gap: 8px;
+            }
+
+            .item-content {
+                padding: 0 4px;
+            }
+
+            p {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="email-container">
+        <div class="logo-section">
+            <img class="logo" src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778427951/logo_ej4zdv.svg"
+                alt="Logo" />
+            <span class="text-xl font-bold">
+                ENERGY<span style="color:#F5A623">IQ</span>
+            </span>
+        </div>
+        <div class="main-section">
+            <div class="main-icon">
+                <img src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778427950/check-mark_atjbgw.svg"
+                    alt="check-mark" />
+            </div>
+
+            <div class="content">
+                <div class="title">
+                    <h1>Welcome to EnergyIQ</h1>
+                </div>
+                <div class="top-content">
+                    <h2 class="sub-title">Hi <span id="name">{{firstName}}</span>,</h2>
+                    <p>Your account has been created successfully and your inverter is
+                        connected.
+                    </p>
+                </div>
+                <div class="middle-content">
+                    <div class="item">
+                        <img class="item1-icon"
+                            src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/squre_vzfmaa.svg"
+                            alt="square" />
+                        <div class="item-content">
+                            <p style="font-weight:600;">Monitor in real time</p>
+                            <p>Track your solar generation, battery levelsand energy usage.</p>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <img class="item2-icon"
+                            src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/graph_qvaddt.svg"
+                            alt="graph" />
+                        <div class="item-content">
+                            <p style="font-weight:600;">Get valuable Insights</p>
+                            <p>Understand your energy patterns and improve efficincy.</p>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <img class="item3-icon"
+                            src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/shield_ttg0da.svg"
+                            alt="shield" />
+                        <div class="item-content">
+                            <p style="font-weight:600;">Save more</p>
+                            <p>Optimize your energy and reduce costs.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button class="bottom-button"><a href="{{clientUrl}}">Log In</a></button>
+                </div>
+                <div class="bottom-content">
+                    <p>Regards, </br>
+                        The EnergyIQ Team
+                    </p>
+                </div>
+            </div>
+        </div>
+        <footer class="footer">
+            <div class="footer-icons">
+                <img class="facebook"
+                    src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/facebook_llfkvr.svg"
+                    alt="facebook" />
+                <img class="in" src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/in_p7abpg.svg"
+                    alt="linkedin" />
+                <img class="x" src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441115/x_wlwnww.svg"
+                    alt="x" />
+                <img class="discord"
+                    src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778441114/discord_fcivey.svg"
+                    alt="discord" />
+                <img class="mail"
+                    src="https://res.cloudinary.com/ds6nd4lbj/image/upload/v1778443756/mail-small_le1rgp.svg"
+                    alt="mail" />
+            </div>
+            <div class="footer-content">
+                <p>© 2025 EnergyIQ. All rights reserved.</p>
+                <p>This is an automated email, please do not reply.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+
+
+</html>
