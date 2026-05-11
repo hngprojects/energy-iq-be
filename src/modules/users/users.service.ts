@@ -77,6 +77,11 @@ export class UsersService {
     return this.userModelAction.findByEmail(email);
   }
 
+  async getCurrentUser(id: string) {
+    const user = await this.findOne(id);
+    return this.toPublicUser(user);
+  }
+
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     await this.findOne(id);
 
@@ -145,6 +150,20 @@ export class UsersService {
         brandSelected: !!user.inverterBrand,
         inverterConnected: user.onboardingComplete,
       },
+    };
+  }
+
+  private toPublicUser(user: User) {
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      lastLoginAt: user.lastLoginAt ?? undefined,
+      emailVerified: user.emailVerified ?? false,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 }

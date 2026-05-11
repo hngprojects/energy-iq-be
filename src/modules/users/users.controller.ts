@@ -39,7 +39,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get the current user using auth headers' })
   @ApiBearerAuth()
   getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
-    return this.usersService.findOne(user.sub);
+    return this.usersService.getCurrentUser(user.sub);
   }
 
   @Get(':id')
