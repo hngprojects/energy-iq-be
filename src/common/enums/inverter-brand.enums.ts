@@ -3,6 +3,7 @@ export enum InverterBrand {
   VICTRON = 'VICTRON',
   GROWATT = 'GROWATT',
   SUNSYNK = 'SUNSYNK',
+  DEYE = 'DEYE',
 }
 
 export enum InverterApiType {
