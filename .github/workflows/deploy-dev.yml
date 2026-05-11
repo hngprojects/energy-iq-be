@@ -41,5 +41,5 @@ jobs:
 
       - name: Health check
         run: |
-          sleep 10
-          curl --fail --max-time 15 https://api.staging.energy-iq.hng14.com/health || exit 1
+          sleep 15
+          curl --fail --max-time 30 https://api.staging.energy-iq.hng14.com/api/v1/health || exit 1
