@@ -88,9 +88,7 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const redirectUrl = `${this.appCfg.clientUrl}/onboarding`;
-
     ValidateRedirectUrl(redirectUrl, this.appCfg.allowedRedirectOrigins);
-
     return res.redirect(`${redirectUrl}#token=${authResponse.accessToken}`);
   }
 
