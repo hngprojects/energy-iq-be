@@ -116,4 +116,19 @@ export class UsersService {
       updatePayload: { emailVerified },
     });
   }
+
+  async getOnboardingStatus(id: string) {
+    const user = await this.findOne(id);
+
+    return {
+      currentStep: user.onboardingStep ?? 1,
+      onboardingComplete: user.onboardingComplete,
+      steps: {
+        accountCreated: true,
+        emailVerified: user.emailVerified,
+        brandSelected: !!user.inverterBrand,
+        inverterConnected: user.onboardingComplete,
+      },
+    };
+  }
 }
