@@ -1,11 +1,9 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InvertersMetricsService } from './inverters-metrics.service';
 import { ParseUUIDPipe } from '@nestjs/common/pipes/parse-uuid.pipe';
 
 @ApiTags('Inverter Metrics')
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @Controller({ path: 'inverter-metrics', version: '1' })
 export class InvertersMetricsController {

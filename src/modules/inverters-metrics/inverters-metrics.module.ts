@@ -8,6 +8,6 @@ import { InvertersMetrics } from './entities/inverters-metrics.entity';
   imports: [TypeOrmModule.forFeature([InvertersMetrics])],
   controllers: [InvertersMetricsController],
   providers: [InvertersMetricsService],
-  exports: [TypeOrmModule],
+  exports: [InvertersMetricsService],
 })
 export class InvertersMetricsModule {}

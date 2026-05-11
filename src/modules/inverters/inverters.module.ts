@@ -8,6 +8,6 @@ import { Inverter } from './entities/inverters.entity';
   imports: [TypeOrmModule.forFeature([Inverter])],
   controllers: [InvertersController],
   providers: [InvertersService],
-  exports: [TypeOrmModule],
+  exports: [InvertersService],
 })
 export class InvertersModule {}
