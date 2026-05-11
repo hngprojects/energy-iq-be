@@ -19,5 +19,5 @@ export class InverterConnectorDto {
   })
   @IsString()
   @MinLength(10)
-  accessToken: string;
+  victronAccessToken: string;
 }
