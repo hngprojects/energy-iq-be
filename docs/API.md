@@ -1,7 +1,8 @@
 # Energy IQ API Reference
 
-Base URL: `https://api.energyiq.com/api/v1` (production)  
-Local: `http://localhost:3000/api/v1`
+Base URL: 
+- Staging: `https://api.staging.energy-iq.hng14.com/api/v1`
+- Production: `https://api.energy-iq.hng14.com/api/v1`
 
 All protected endpoints require a Bearer token in the `Authorization` header:
 ```
