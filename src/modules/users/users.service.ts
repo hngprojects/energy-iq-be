@@ -142,12 +142,12 @@ export class UsersService {
   async connectUserInverter(
     brand: InverterBrand,
     userId: string,
-    accessToken: string,
+    victronAccessToken: string,
   ): Promise<Inverter> {
     return await this.invertersService.connectInverter({
       brand,
       userId,
-      accessToken,
+      victronAccessToken,
     });
   }
 
