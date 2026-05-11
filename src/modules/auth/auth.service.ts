@@ -84,7 +84,7 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
-  async verifyEmail(dto: VerifyEmailDto): Promise<PublicUser> {
+  async verifyEmail(dto: VerifyEmailDto): Promise<AuthResponse | PublicUser> {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException(SYS_MSG.INVALID_OTP);
 
@@ -111,7 +111,7 @@ export class AuthService {
     await this.redis.delete(attemptKey, 'otp_attempts');
 
     user.emailVerified = true;
-    return this.toPublicUser(user);
+    return this.issueTokens(user);
   }
 
   async resendVerificationEmail(dto: ResendVerificationDto) {

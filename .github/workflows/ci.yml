@@ -3,6 +3,7 @@ name: CI Quality & Security Gate
 on:
   pull_request:
     branches:
+      - dev
       - staging
   workflow_dispatch:
 

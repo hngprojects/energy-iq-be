@@ -2,7 +2,6 @@
 export enum InverterBrand {
   VICTRON = 'VICTRON',
   GROWATT = 'GROWATT',
-  DEYE = 'DEYE',
   SUNSYNK = 'SUNSYNK',
 }
 

@@ -12,7 +12,13 @@ export class InvertersController {
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get all inverters for a user' })
   findByUser(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.invertersService.findByUser(userId);
+    return this.invertersService.findByUserId(userId);
+  }
+
+  @Get('supported-brands')
+  @ApiOperation({ summary: 'Get supported inverter brands' })
+  getSupportedBrands() {
+    return this.invertersService.getSupportedInverterBrands();
   }
 
   @Get(':id')
