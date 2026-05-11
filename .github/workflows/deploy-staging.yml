@@ -1,14 +1,14 @@
-name: Deploy to Dev
+name: Deploy to Staging
 
 on:
   push:
     branches:
-      - dev
+      - staging
   workflow_dispatch:
 
 jobs:
   deploy:
-    name: Deploy to Dev Server
+    name: Deploy to Staging Server
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,7 @@ jobs:
             sudo -u appuser bash -c '
               cd /home/appuser/backend/staging/energy-iq-be
 
-              git pull origin dev
+              git pull origin staging
 
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
