@@ -57,6 +57,9 @@ export const env = createEnv({
       .union([z.boolean(), z.enum(['true', 'false'])])
       .default(true)
       .transform((v) => v === true || v === 'true'),
+    VICTRON_API_BASE: z.string().default('https://vrmapi.victronenergy.com/v2'),
+    GROWATT_API_BASE: z.string().default('https://openapi.growatt.com/v1'),
+    SOLARMAN_API_BASE: z.string().default('https://globalapi.solarmanpv.com'),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
