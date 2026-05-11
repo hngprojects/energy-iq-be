@@ -242,7 +242,7 @@ Delete a user.
 
 ---
 
-### `POST /users/onboarding/connect`
+### `POST /users/onboarding`
 Connect a user's inverter during onboarding.
 
 **Request body**
@@ -250,7 +250,7 @@ Connect a user's inverter during onboarding.
 {
   "brand": "VICTRON",
   "userId": "uuid",
-  "accessToken": "victron-vrm-personal-access-token"
+  "victronAccessToken": "victron-vrm-personal-access-token"
 }
 ```
 
