@@ -13,12 +13,18 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { GoogleOAuthDto } from '../auth/dto/google-oauth.dto';
+import { Inverter } from '../inverters/entities/inverters.entity';
+import { InvertersService } from '../inverters/inverters.service';
+import { InverterBrand } from '../../common/enums';
 
 const BCRYPT_ROUNDS = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userModelAction: UserModelAction) {}
+  constructor(
+    private readonly userModelAction: UserModelAction,
+    private readonly invertersService: InvertersService,
+  ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
     const existing = await this.userModelAction.findByEmail(dto.email);
@@ -130,6 +136,18 @@ export class UsersService {
       ...noTransaction(),
       identifierOptions: { id },
       updatePayload: { emailVerified },
+    });
+  }
+
+  async connectUserInverter(
+    brand: InverterBrand,
+    userId: string,
+    accessToken: string,
+  ): Promise<Inverter> {
+    return await this.invertersService.connectInverter({
+      brand,
+      userId,
+      accessToken,
     });
   }
 

@@ -18,16 +18,12 @@ import { UsersService } from './users.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { InverterConnectorDto } from '../inverters/dto/inverter-connector.dto';
-import { InvertersService } from '../inverters/inverters.service';
 
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly invertersService: InvertersService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get()
   @ApiOperation({ summary: 'List users (paginated)' })
@@ -38,7 +34,11 @@ export class UsersController {
   @Post('onboarding/connect')
   @ApiOperation({ summary: 'Connect user inverter brand' })
   connectInverter(@Body() dto: InverterConnectorDto) {
-    return this.invertersService.connectInverter(dto);
+    return this.usersService.connectUserInverter(
+      dto.brand,
+      dto.userId,
+      dto.accessToken,
+    );
   }
 
   @Get('onboarding/status')
