@@ -31,13 +31,13 @@ export class UsersController {
     return this.usersService.findAll(pagination);
   }
 
-  @Post('onboarding/connect')
+  @Post('onboard')
   @ApiOperation({ summary: 'Connect user inverter brand' })
   connectInverter(@Body() dto: InverterConnectorDto) {
     return this.usersService.connectUserInverter(
       dto.brand,
       dto.userId,
-      dto.accessToken,
+      dto.victronAccessToken,
     );
   }
 

@@ -39,10 +39,10 @@ export class InvertersService {
   }
 
   async connectVictronInverter(dto: InverterConnectorDto): Promise<Inverter> {
-    const { accessToken, userId } = dto;
+    const { victronAccessToken, userId } = dto;
     // verify with VRM and get back the mapped fields
     const systemData =
-      await this.victronAdapter.verifyAndGetSystem(accessToken);
+      await this.victronAdapter.verifyAndGetSystem(victronAccessToken);
     const existing = await this.inverterModelAction.findBySerialNumber(
       systemData.serialNumber,
     );
@@ -51,7 +51,7 @@ export class InvertersService {
         'This Victron installation is already connected to an account.',
       );
     // encrypt the token before touching the DB
-    const encryptedCredentials = SecretManager.encrypt(accessToken);
+    const encryptedCredentials = SecretManager.encrypt(victronAccessToken);
 
     // create record in DB and persist
     return this.inverterModelAction.create({
