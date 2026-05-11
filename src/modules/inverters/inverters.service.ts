@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  NotImplementedException,
 } from '@nestjs/common';
 import { InverterConnectorDto } from './dto/inverter-connector.dto';
 import { VictronAdapter } from './adapters/victron.adapters';
@@ -24,10 +25,17 @@ export class InvertersService {
   ) {}
 
   async connectInverter(dto: InverterConnectorDto): Promise<Inverter> {
-    if (dto.brand === InverterBrand.VICTRON)
-      await this.connectVictronInverter(dto);
+    if (dto.brand === InverterBrand.VICTRON) {
+      return await this.connectVictronInverter(dto);
+    } else if (dto.brand === InverterBrand.GROWATT) {
+      throw new NotImplementedException();
+    } else if (dto.brand === InverterBrand.SUNSYNK) {
+      throw new NotImplementedException();
+    }
 
-    throw new ConflictException(`Unsupported inverter brand: ${dto.brand}`);
+    throw new ConflictException(
+      `Unsupported inverter brand: ${dto.brand as string}`,
+    );
   }
 
   async connectVictronInverter(dto: InverterConnectorDto): Promise<Inverter> {
