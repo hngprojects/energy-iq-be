@@ -38,6 +38,18 @@ export class InvertersMetrics extends AbstractBaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   rawData?: Record<string, unknown>;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  inverterStatus?: string;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  batteryTemperatureC?: number;
+
+  @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
+  batteryTimeToGoMin?: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  inverterTemperatureC?: number;
+
   @Column({ type: 'timestamptz' })
   metricTimestamp: Date;
 
