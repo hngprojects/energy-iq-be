@@ -39,6 +39,8 @@ export class UsersService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         role: dto.role,
+        onboardingStep: 1,
+        onboardingComplete: false,
       },
     });
   }
@@ -135,20 +137,36 @@ export class UsersService {
     await this.userModelAction.update({
       ...noTransaction(),
       identifierOptions: { id },
-      updatePayload: { emailVerified },
+      updatePayload: {
+        emailVerified,
+        onboardingStep: emailVerified ? 2 : 1,
+      },
     });
   }
 
   async connectUserInverter(
     brand: InverterBrand,
+    victronAccessToken: string,
     userId: string,
-    accessToken: string,
   ): Promise<Inverter> {
-    return await this.invertersService.connectInverter({
-      brand,
+    const inverter = await this.invertersService.connectInverter(
+      {
+        brand,
+        victronAccessToken,
+      },
       userId,
-      accessToken,
+    );
+
+    await this.userModelAction.update({
+      ...noTransaction(),
+      identifierOptions: { id: userId },
+      updatePayload: {
+        onboardingStep: 3,
+        onboardingComplete: true,
+      },
     });
+
+    return inverter;
   }
 
   async getOnboardingStatus(id: string) {
@@ -160,7 +178,6 @@ export class UsersService {
       steps: {
         accountCreated: true,
         emailVerified: user.emailVerified,
-        brandSelected: !!user.inverterBrand,
         inverterConnected: user.onboardingComplete,
       },
     };

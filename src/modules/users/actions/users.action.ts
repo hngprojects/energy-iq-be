@@ -34,6 +34,8 @@ export class UserModelAction extends AbstractModelAction<User> {
         lastName: data.lastName,
         googleId: data.googleId,
         emailVerified: true,
+        onboardingStep: 2,
+        onboardingComplete: false,
       })
       .orUpdate(['google_id', 'email_verified'], ['email'])
       .returning(['id'])

@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   NotImplementedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InverterConnectorDto } from './dto/inverter-connector.dto';
 import { VictronAdapter } from './adapters/victron.adapters';
@@ -24,9 +25,12 @@ export class InvertersService {
     private readonly inverterModelAction: InverterModelAction,
   ) {}
 
-  async connectInverter(dto: InverterConnectorDto): Promise<Inverter> {
+  async connectInverter(
+    dto: InverterConnectorDto,
+    userId: string,
+  ): Promise<Inverter> {
     if (dto.brand === InverterBrand.VICTRON) {
-      return await this.connectVictronInverter(dto);
+      return await this.connectVictronInverter(dto, userId);
     } else if (dto.brand === InverterBrand.GROWATT) {
       throw new NotImplementedException();
     } else if (dto.brand === InverterBrand.SUNSYNK) {
@@ -38,11 +42,14 @@ export class InvertersService {
     );
   }
 
-  async connectVictronInverter(dto: InverterConnectorDto): Promise<Inverter> {
-    const { accessToken, userId } = dto;
+  async connectVictronInverter(
+    dto: InverterConnectorDto,
+    userId: string,
+  ): Promise<Inverter> {
+    const { victronAccessToken } = dto;
     // verify with VRM and get back the mapped fields
     const systemData =
-      await this.victronAdapter.verifyAndGetSystem(accessToken);
+      await this.victronAdapter.verifyAndGetSystem(victronAccessToken);
     const existing = await this.inverterModelAction.findBySerialNumber(
       systemData.serialNumber,
     );
@@ -51,7 +58,7 @@ export class InvertersService {
         'This Victron installation is already connected to an account.',
       );
     // encrypt the token before touching the DB
-    const encryptedCredentials = SecretManager.encrypt(accessToken);
+    const encryptedCredentials = SecretManager.encrypt(victronAccessToken);
 
     // create record in DB and persist
     return this.inverterModelAction.create({
@@ -70,7 +77,7 @@ export class InvertersService {
   }
 
   async findByUserId(userId: string): Promise<Inverter[]> {
-    const inverters = await this.inverterModelAction.findByUserId(userId);
+    const inverters = await this.inverterModelAction.findActiveByUserId(userId);
     if (!inverters?.length) throw new NotFoundException(SYS_MSG.NOT_FOUND);
     return inverters;
   }
@@ -81,6 +88,29 @@ export class InvertersService {
     });
     if (!inverter) throw new NotFoundException(SYS_MSG.NOT_FOUND);
     return inverter;
+  }
+
+  async deactivateInverter(
+    inverterId: string,
+    requestingUserId: string,
+  ): Promise<Inverter> {
+    const inverter = await this.inverterModelAction.get({
+      identifierOptions: { id: inverterId },
+    });
+
+    if (!inverter) throw new NotFoundException(SYS_MSG.NOT_FOUND);
+
+    if (inverter.userId !== requestingUserId) {
+      throw new ForbiddenException(SYS_MSG.FORBIDDEN);
+    }
+
+    if (!inverter.isActive) {
+      throw new ConflictException(SYS_MSG.INVERTER_ALREADY_INACTIVE);
+    }
+
+    await this.inverterModelAction.deactivateById(inverterId);
+
+    return { ...inverter, isActive: false };
   }
 
   getSupportedInverterBrands(): InverterBrand[] {

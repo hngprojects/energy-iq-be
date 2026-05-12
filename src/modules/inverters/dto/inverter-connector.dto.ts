@@ -10,14 +10,10 @@ export class InverterConnectorDto {
   @IsEnum(InverterBrand)
   brand: InverterBrand;
 
-  @ApiProperty({ description: 'The ID of the user connecting the inverter' })
-  @IsString()
-  userId: string;
-
   @ApiProperty({
     description: 'The access token for the inverter (e.g. Victron VRM PAT)',
   })
   @IsString()
   @MinLength(10)
-  accessToken: string;
+  victronAccessToken: string;
 }

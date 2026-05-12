@@ -25,6 +25,7 @@ import { RedisModule } from './common/redis/redis.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { InvertersModule } from './modules/inverters/inverters.module';
 import { InvertersMetricsModule } from './modules/inverters-metrics/inverters-metrics.module';
+import { WellKnownModule } from './modules/well-known/well-known.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { InvertersMetricsModule } from './modules/inverters-metrics/inverters-me
     RedisModule,
     InvertersModule,
     InvertersMetricsModule,
+    WellKnownModule,
   ],
   providers: [
     {
