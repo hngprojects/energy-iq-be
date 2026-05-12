@@ -38,6 +38,7 @@ export const env = createEnv({
 
     RESEND_API_KEY: z.string().min(1),
     RESEND_FROM: z.string().email().default('energyiq@hng14.com'),
+    SUPPORT_EMAIL: z.string().email().default('support@energyiq.com'),
 
     JWT_ACCESS_SECRET: z
       .string()
