@@ -13,7 +13,16 @@ export class ChatModelAction extends AbstractModelAction<Chat> {
     super(repository, Chat);
   }
 
-  async findById(id: string): Promise<Chat | null> {
+  async createChat(chat: { contextLength: number; expTimeout: number }) {
+    return this.create({
+      createPayload: chat,
+      transactionOptions: {
+        useTransaction: false,
+      },
+    });
+  }
+
+  findById(id: string): Promise<Chat | null> {
     return this.get({ identifierOptions: { id } });
   }
 

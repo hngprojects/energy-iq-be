@@ -25,6 +25,8 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { appConfig } from '../../config/app.config';
 import { type ConfigType } from '@nestjs/config';
 import { ValidateRedirectUrl } from '../../common/utils/redirect.util';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -63,6 +65,7 @@ export class AuthController {
 
   @Public()
   @Get('google')
+  @HttpCode(HttpStatus.FOUND)
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth redirect' })
   googleAuth() {
@@ -71,16 +74,21 @@ export class AuthController {
 
   @Public()
   @Get('google/callback')
+  @HttpCode(HttpStatus.FOUND)
   @UseGuards(GoogleAuthGuard)
-  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiOperation({
+    summary: 'Google OAuth callback',
+    description:
+      'Handles the OAuth callback from Google. On success, redirects the browser to ' +
+      '`{CLIENT_URL}/onboarding#token=<accessToken>`. ' +
+      'The access token is passed as a URL fragment (after `#`), not a query parameter. ',
+  })
   googleCallback(
     @CurrentUser() authResponse: AuthResponse,
     @Res() res: Response,
   ) {
-    const redirectUrl = `${this.appCfg.clientUrl}/auth/callback`;
-
+    const redirectUrl = `${this.appCfg.clientUrl}/onboarding`;
     ValidateRedirectUrl(redirectUrl, this.appCfg.allowedRedirectOrigins);
-
     return res.redirect(`${redirectUrl}#token=${authResponse.accessToken}`);
   }
 
@@ -109,12 +117,28 @@ export class AuthController {
   }
 
   @Public()
-  @Post('resend-verification')
+  @Post('resend-email-otp')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Resend a verification email if no active code exists',
   })
   resendVerification(@Body() dto: ResendVerificationDto) {
     return this.authService.resendVerificationEmail(dto);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Set password after requesting reset' })
+  resetPasword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

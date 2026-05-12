@@ -7,18 +7,24 @@ import {
 import * as bcrypt from 'bcrypt';
 import { noTransaction } from '../../common/constants/transaction-options';
 import { SYS_MSG } from '../../common/constants/sys-msg';
-import { UserModelAction } from './actions/user.action';
+import { UserModelAction } from './actions/users.action';
 import { CreateUserDto } from './dto/create-user.dto';
-import { PaginationDto } from './dto/pagination.dto';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { GoogleOAuthDto } from '../auth/dto/google-oauth.dto';
+import { Inverter } from '../inverters/entities/inverters.entity';
+import { InvertersService } from '../inverters/inverters.service';
+import { InverterBrand } from '../../common/enums';
 
 const BCRYPT_ROUNDS = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userModelAction: UserModelAction) {}
+  constructor(
+    private readonly userModelAction: UserModelAction,
+    private readonly invertersService: InvertersService,
+  ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
     const existing = await this.userModelAction.findByEmail(dto.email);
@@ -93,6 +99,22 @@ export class UsersService {
     return updated;
   }
 
+  async updatePasswordHash(id: string, passwordHash: string): Promise<User> {
+    await this.findOne(id);
+
+    const payload: Partial<User> = { passwordHash };
+
+    const updated = await this.userModelAction.update({
+      ...noTransaction(),
+      identifierOptions: { id },
+      updatePayload: payload,
+    });
+    if (!updated) {
+      throw new InternalServerErrorException(SYS_MSG.INTERNAL_SERVER_ERROR);
+    }
+    return updated;
+  }
+
   async remove(id: string): Promise<void> {
     await this.findOne(id);
     await this.userModelAction.delete({
@@ -115,5 +137,32 @@ export class UsersService {
       identifierOptions: { id },
       updatePayload: { emailVerified },
     });
+  }
+
+  async connectUserInverter(
+    brand: InverterBrand,
+    userId: string,
+    accessToken: string,
+  ): Promise<Inverter> {
+    return await this.invertersService.connectInverter({
+      brand,
+      userId,
+      accessToken,
+    });
+  }
+
+  async getOnboardingStatus(id: string) {
+    const user = await this.findOne(id);
+
+    return {
+      currentStep: user.onboardingStep ?? 1,
+      onboardingComplete: user.onboardingComplete,
+      steps: {
+        accountCreated: true,
+        emailVerified: user.emailVerified,
+        brandSelected: !!user.inverterBrand,
+        inverterConnected: user.onboardingComplete,
+      },
+    };
   }
 }

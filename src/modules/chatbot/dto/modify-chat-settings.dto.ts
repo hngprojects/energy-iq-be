@@ -1,6 +1,6 @@
 import { IsInt, IsUUID } from 'class-validator';
 
-export class ModifyChatDTO {
+export class ModifyChatSettingsDTO {
   @IsUUID()
   chatId: string;
 

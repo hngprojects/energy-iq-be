@@ -1,11 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InvertersService } from './inverters.service';
 import { ParseUUIDPipe } from '@nestjs/common/pipes/parse-uuid.pipe';
 
 @ApiTags('Inverters')
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @Controller({ path: 'inverters', version: '1' })
 export class InvertersController {
@@ -14,7 +12,13 @@ export class InvertersController {
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get all inverters for a user' })
   findByUser(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.invertersService.findByUser(userId);
+    return this.invertersService.findByUserId(userId);
+  }
+
+  @Get('supported-brands')
+  @ApiOperation({ summary: 'Get supported inverter brands' })
+  getSupportedBrands() {
+    return this.invertersService.getSupportedInverterBrands();
   }
 
   @Get(':id')

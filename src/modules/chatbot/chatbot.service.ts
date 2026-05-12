@@ -1,12 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { ModifyChatSettingsDTO } from './dto/modify-chat-settings.dto';
+import { ChatModelAction } from './actions/chat.action';
+import { UsersService } from '../users/users.service';
+import { StartChatDto } from './dto/start-chat.dto';
+import { SYS_MSG } from '../../common/constants/sys-msg';
 
 @Injectable()
 export class ChatbotService {
-  async createChat() {}
+  constructor(
+    private readonly chatModelAction: ChatModelAction,
+    private readonly usersService: UsersService,
+  ) {}
 
-  async getChatsForUser() {}
+  startChat(dto: StartChatDto) {
+    /**
+     * create a chat with this user id
+     */
+    if (dto.initiatorId !== dto.userId)
+      throw new ConflictException(SYS_MSG.CONFLICT);
+    return null;
+  }
 
-  async getChatMessages() {
+  async getChatsForUser(userId: string) {
+    await this.usersService.findOne(userId); // this is meant to throw an exception if the user is invalid
+    const chats = await this.chatModelAction.findByUserId(userId);
+    return chats;
+  }
+
+  getChatMessages(chatId: string) {
     /**
      * Steps to get chat messages
      *
@@ -15,11 +36,16 @@ export class ChatbotService {
      * get all the messages with with the given chat id, paginated and ordered in descending order of date
      * return messages
      */
+    return chatId;
   }
 
-  async getSingleChat() {}
+  getSingleChat(chatId: string) {
+    return chatId;
+  }
 
-  async modifyChatSettings() {
+  getSuggestedChatQuestions() {}
+
+  modifyChatSettings(chatId: string, dto: ModifyChatSettingsDTO) {
     /**
      * Steps to modify chat settings
      *
@@ -27,6 +53,7 @@ export class ChatbotService {
      * update the chat settings
      * return the updated chat to the user
      */
+    return { chatId, dto };
   }
 
   async sendMessage() {
