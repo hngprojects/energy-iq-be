@@ -6,8 +6,9 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ChatbotService } from './chatbot.service';
+import { ChatService } from './chat.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import {
   type AuthenticatedUser,
@@ -18,8 +19,8 @@ import { Throttle } from '@nestjs/throttler';
 import { StartChatDto } from './dto/start-chat.dto';
 
 @Controller('chats')
-export class ChatbotController {
-  constructor(private readonly chatbotService: ChatbotService) {}
+export class ChatController {
+  constructor(private readonly chatbotService: ChatService) {}
 
   @Post('')
   @Throttle({ default: { limit: 3, ttl: 3000 } })
@@ -33,7 +34,6 @@ export class ChatbotController {
   }
 
   @Get('')
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all chats started by a user' })
   getChatsForUser(@CurrentUser() user: AuthenticatedUser) {
     return this.chatbotService.getChatsForUser(user.sub);
@@ -42,8 +42,11 @@ export class ChatbotController {
   @Get(':id/messages')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all the messages in a chat' })
-  getChatMessages(@Param('id', ParseUUIDPipe) chatId: string) {
-    return this.chatbotService.getChatMessages(chatId);
+  getChatMessages(
+    @Param('id', ParseUUIDPipe) chatId: string,
+    @Query('user_id', ParseUUIDPipe) userId: string,
+  ) {
+    return this.chatbotService.getChatMessages({ chatId, userId });
   }
 
   @Get(':id')
@@ -55,7 +58,7 @@ export class ChatbotController {
 
   @Patch(':id/settings')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Makes modifications to the settings of a chat' })
+  @ApiOperation({ summary: 'Make modifications to the settings of a chat' })
   modifyChatSettings(
     @Param('id', ParseUUIDPipe) chatId: string,
     @Body() dto: ModifyChatSettingsDTO,

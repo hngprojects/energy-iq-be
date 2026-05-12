@@ -3,12 +3,12 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { ChatbotService } from './chatbot.service';
+import { ChatService } from './chat.service';
 import { ChatbotSocketEvents } from './helpers/events';
 
 @WebSocketGateway({ namespace: 'agent' })
-export class ChatbotGateway implements OnGatewayConnection {
-  constructor(private readonly chatbotService: ChatbotService) {}
+export class ChatGateway implements OnGatewayConnection {
+  constructor(private readonly chatbotService: ChatService) {}
 
   handleConnection(client: { id: string }) {
     console.log('user with id', client.id, 'has connected to the socket');

@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@hng-sdk/orm": "^0.0.0",
+    "@langchain/core": "^1.1.45",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.19",
     "@nestjs/config": "^4.0.4",
@@ -58,10 +59,12 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "compression": "^1.8.1",
+    "deepagents": "^1.10.0",
     "dotenv": "^17.4.2",
     "handlebars": "^4.7.9",
     "helmet": "^8.1.0",
     "ioredis": "^5.10.1",
+    "langchain": "^1.4.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
@@ -69,6 +72,7 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.12.3",
     "rxjs": "^7.8.2",
+    "socket.io": "^4.8.3",
     "typeorm": "^0.3.28",
     "typeorm-naming-strategies": "^4.1.0",
     "zod": "^4.3.6"

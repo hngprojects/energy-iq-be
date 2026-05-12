@@ -16,7 +16,7 @@ export class Chat extends AbstractBaseEntity {
   @Column({ type: 'boolean', default: false })
   isArchived: boolean;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ type: 'timestamptz', nullable: true })
   lastMessageTimestamp: Date;
 
   @Column({ type: 'varchar', length: 200, nullable: true })

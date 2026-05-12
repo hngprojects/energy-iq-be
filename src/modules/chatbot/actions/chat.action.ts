@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Chat } from '../entities/chat.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { noTransaction } from '../../../common/constants/transaction-options';
 
 @Injectable()
 export class ChatModelAction extends AbstractModelAction<Chat> {
@@ -13,12 +14,10 @@ export class ChatModelAction extends AbstractModelAction<Chat> {
     super(repository, Chat);
   }
 
-  async createChat(chat: { contextLength: number; expTimeout: number }) {
+  async createChat(chat: Partial<Chat>) {
     return this.create({
+      ...noTransaction(),
       createPayload: chat,
-      transactionOptions: {
-        useTransaction: false,
-      },
     });
   }
 
@@ -31,9 +30,7 @@ export class ChatModelAction extends AbstractModelAction<Chat> {
       findOptions: {
         userId,
       },
-      transactionOptions: {
-        useTransaction: false,
-      },
+      ...noTransaction(),
     });
     return result.payload;
   }

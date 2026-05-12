@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Message } from '../entities/message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { noTransaction } from '../../../common/constants/transaction-options';
 
 @Injectable()
 export class MessageModelAction extends AbstractModelAction<Message> {
@@ -17,10 +18,10 @@ export class MessageModelAction extends AbstractModelAction<Message> {
     return result.payload;
   }
 
-  async saveMessage(message: Message) {
-    return this.save({
-      entity: message,
-      transactionOptions: { useTransaction: false },
+  async saveMessage(message: Partial<Message>) {
+    return this.create({
+      createPayload: message,
+      ...noTransaction(),
     });
   }
 
