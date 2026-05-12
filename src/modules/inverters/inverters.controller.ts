@@ -1,7 +1,11 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InvertersService } from './inverters.service';
 import { ParseUUIDPipe } from '@nestjs/common/pipes/parse-uuid.pipe';
+import {
+  type AuthenticatedUser,
+  CurrentUser,
+} from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Inverters')
 @ApiBearerAuth()
@@ -19,6 +23,15 @@ export class InvertersController {
   @ApiOperation({ summary: 'Get supported inverter brands' })
   getSupportedBrands() {
     return this.invertersService.getSupportedInverterBrands();
+  }
+
+  @Patch(':id/deactivate')
+  @ApiOperation({ summary: 'Deactivate an inverter (owner only)' })
+  deactivate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.invertersService.deactivateInverter(id, user.sub);
   }
 
   @Get(':id')

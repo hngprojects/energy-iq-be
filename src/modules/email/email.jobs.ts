@@ -1,9 +1,9 @@
 export const EMAIL_JOBS = {
   WELCOME: 'welcome',
-  PASSWORD_RESET: 'password_reset',
-  VERIFY_EMAIL: 'verify_email',
-  PASSWORD_UPDATE: 'password_update',
-  LINK_EXPIRE: 'link_expire',
+  PASSWORD_RESET: 'password-reset',
+  VERIFY_EMAIL: 'verify-email',
+  PASSWORD_UPDATE: 'password-update',
+  LINK_EXPIRE: 'link-expire',
 } as const;
 
 // clientUrl here is the redirect to login

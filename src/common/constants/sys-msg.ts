@@ -32,4 +32,6 @@ export const SYS_MSG = {
   FORBIDDEN_REDIRECT_URL: 'Redirected URL origin not permitted',
   UNVERIFIED_USER: 'The user email is not verified',
   INVALID_TOKEN: 'The token is invalid',
+  INVERTER_DEACTIVATED: 'Inverter deactivated successfully',
+  INVERTER_ALREADY_INACTIVE: 'This inverter is already deactivated',
 } as const;

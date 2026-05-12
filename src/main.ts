@@ -34,7 +34,9 @@ async function bootstrap() {
     prefix: 'v',
     defaultVersion: '1',
   });
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: ['.well-known/(.*)'],
+  });
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableShutdownHooks();
 

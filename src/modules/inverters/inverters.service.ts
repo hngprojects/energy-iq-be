@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   NotImplementedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InverterConnectorDto } from './dto/inverter-connector.dto';
 import { VictronAdapter } from './adapters/victron.adapters';
@@ -76,7 +77,7 @@ export class InvertersService {
   }
 
   async findByUserId(userId: string): Promise<Inverter[]> {
-    const inverters = await this.inverterModelAction.findByUserId(userId);
+    const inverters = await this.inverterModelAction.findActiveByUserId(userId);
     if (!inverters?.length) throw new NotFoundException(SYS_MSG.NOT_FOUND);
     return inverters;
   }
@@ -87,6 +88,29 @@ export class InvertersService {
     });
     if (!inverter) throw new NotFoundException(SYS_MSG.NOT_FOUND);
     return inverter;
+  }
+
+  async deactivateInverter(
+    inverterId: string,
+    requestingUserId: string,
+  ): Promise<Inverter> {
+    const inverter = await this.inverterModelAction.get({
+      identifierOptions: { id: inverterId },
+    });
+
+    if (!inverter) throw new NotFoundException(SYS_MSG.NOT_FOUND);
+
+    if (inverter.userId !== requestingUserId) {
+      throw new ForbiddenException(SYS_MSG.FORBIDDEN);
+    }
+
+    if (!inverter.isActive) {
+      throw new ConflictException(SYS_MSG.INVERTER_ALREADY_INACTIVE);
+    }
+
+    await this.inverterModelAction.deactivateById(inverterId);
+
+    return { ...inverter, isActive: false };
   }
 
   getSupportedInverterBrands(): InverterBrand[] {
