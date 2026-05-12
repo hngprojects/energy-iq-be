@@ -29,8 +29,6 @@ export class InverterModelAction extends AbstractModelAction<Inverter> {
     return this.repository.find({ where: { userId, isActive: true } });
   }
 
-  async;
-
   async deactivateById(id: string): Promise<void> {
     await this.repository.update({ id }, { isActive: false });
   }
