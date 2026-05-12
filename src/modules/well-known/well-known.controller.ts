@@ -12,8 +12,8 @@ export class WellKnownController {
   @Public()
   @Get('assetlinks.json')
   @ApiOperation({ summary: 'Android App Links configuration' })
-  getAssetLinks(@Res() res: Response) {
+  getAssetLinks(@Res() res: Response): void {
     const data = this.wellKnownService.getAssetLinks();
-    res.json(data);
+    return void res.json(data);
   }
 }
