@@ -6,10 +6,7 @@ import { User } from '../entities/user.entity';
 
 @Injectable()
 export class UserModelAction extends AbstractModelAction<User> {
-  constructor(
-    @InjectRepository(User)
-    repository: Repository<User>,
-  ) {
+  constructor(@InjectRepository(User) repository: Repository<User>) {
     super(repository, User);
   }
 

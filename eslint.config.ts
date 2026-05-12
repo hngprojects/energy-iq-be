@@ -20,7 +20,7 @@ const config: ConfigArray = tseslint.config(
       sourceType: 'commonjs',
       parserOptions: {
         projectService: true,
-        // tsconfigRootDir: __dirname,
+        tsconfigRootDir: __dirname,
       },
     },
   },

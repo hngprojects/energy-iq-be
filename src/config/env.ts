@@ -57,6 +57,19 @@ export const env = createEnv({
       .union([z.boolean(), z.enum(['true', 'false'])])
       .default(true)
       .transform((v) => v === true || v === 'true'),
+
+    CHAT_CONTEXT_LENGTH: z.coerce
+      .number()
+      .int()
+      .positive()
+      .transform((v) => Number(v)),
+    CHAT_EXP_TIMEOUT_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .transform((v) => Number(v)),
+    GROQ_API_KEY: z.string().nonoptional(),
+    CHATBOT_NAME: z.string().default('orochimaru'),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

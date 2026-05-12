@@ -15,6 +15,8 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { AppThrottlerGuard } from './common/guards/throttler.guard';
 import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { chatbotConfig } from './config/chatbot.config';
 import { EmailModule } from './modules/email/email.module';
 import { redisConfig } from './config/redis.config';
 import { BullModule } from '@nestjs/bullmq';
@@ -29,12 +31,25 @@ import { WellKnownModule } from './modules/well-known/well-known.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig, redisConfig, googleConfig],
+      load: [
+        appConfig,
+        chatbotConfig,
+        databaseConfig,
+        jwtConfig,
+        redisConfig,
+        googleConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => databaseConfig(),
     }),
     BullModule.forRoot(bullConfig),
+    HealthModule,
+    UsersModule,
+    AuthModule,
+    ChatbotModule,
+    EmailModule,
+    RedisModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
