@@ -51,7 +51,7 @@ describe('EmailService', () => {
       'https://reset.link',
       'John',
     );
-    expect(mockQueue.add).toHaveBeenCalledWith('password_reset', {
+    expect(mockQueue.add).toHaveBeenCalledWith('password-reset', {
       to: 'user@example.com',
       resetLink: 'https://reset.link',
       firstName: 'John',
@@ -65,7 +65,7 @@ describe('EmailService', () => {
       '123456',
       'https://app.example.com',
     );
-    expect(mockQueue.add).toHaveBeenCalledWith('verify_email', {
+    expect(mockQueue.add).toHaveBeenCalledWith('verify-email', {
       to: 'user@example.com',
       firstName: 'John',
       verifyCode: '123456',
@@ -79,7 +79,7 @@ describe('EmailService', () => {
       'https://app.example.com',
       'John',
     );
-    expect(mockQueue.add).toHaveBeenCalledWith('password_update', {
+    expect(mockQueue.add).toHaveBeenCalledWith('password-update', {
       to: 'user@example.com',
       clientUrl: 'https://app.example.com',
       firstName: 'John',
@@ -92,7 +92,7 @@ describe('EmailService', () => {
       'https://reset.link',
       'John',
     );
-    expect(mockQueue.add).toHaveBeenCalledWith('link_expire', {
+    expect(mockQueue.add).toHaveBeenCalledWith('link-expire', {
       to: 'user@example.com',
       requestUrl: 'https://reset.link',
       firstName: 'John',
