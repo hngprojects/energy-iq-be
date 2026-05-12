@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Chat } from './entities/chat.entity';
 import { Message } from './entities/message.entity';
 import { ChatbotService } from './chatbot.service';
+import { LLMService } from './llm.service';
 
 @Module({
   providers: [
@@ -16,6 +17,7 @@ import { ChatbotService } from './chatbot.service';
     ChatGateway,
     ChatService,
     ChatModelAction,
+    LLMService,
     MessageModelAction,
   ],
   controllers: [ChatController],

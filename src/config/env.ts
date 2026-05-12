@@ -68,6 +68,8 @@ export const env = createEnv({
       .int()
       .positive()
       .transform((v) => Number(v)),
+    GROQ_API_KEY: z.string().nonoptional(),
+    CHATBOT_NAME: z.string().default('orochimaru'),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

@@ -21,6 +21,16 @@ export class ChatModelAction extends AbstractModelAction<Chat> {
     });
   }
 
+  async findActiveChatsByUserId(userId: string): Promise<Chat[]> {
+    const activeChats = await this.find({
+      ...noTransaction(),
+      findOptions: {
+        userId,
+      },
+    });
+    return activeChats.payload;
+  }
+
   findById(id: string): Promise<Chat | null> {
     return this.get({ identifierOptions: { id } });
   }

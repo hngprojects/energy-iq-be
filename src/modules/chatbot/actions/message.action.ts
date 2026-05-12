@@ -18,6 +18,23 @@ export class MessageModelAction extends AbstractModelAction<Message> {
     return result.payload;
   }
 
+  async getMessagesWithCount(
+    chatId: string,
+    count: number,
+  ): Promise<Message[]> {
+    const result = await this.list({
+      filterRecordOptions: { chat: { id: chatId } },
+      paginationPayload: {
+        limit: count,
+        page: 1,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+    return result.payload;
+  }
+
   async saveMessage(message: Partial<Message>) {
     return this.create({
       createPayload: message,
