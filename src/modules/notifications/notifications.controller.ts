@@ -27,9 +27,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 @ApiBearerAuth()
 @Controller({ path: 'notifications', version: '1' })
 export class NotificationsController {
-  constructor(
-    private readonly notificationsService: NotificationsService,
-  ) {}
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   /**
    * GET /api/v1/notifications
@@ -53,10 +51,7 @@ export class NotificationsController {
     @CurrentUser() user: { id: string },
     @Query() query: NotificationQueryDto,
   ) {
-    return this.notificationsService.findAllForUser(
-      user.id,
-      query,
-    );
+    return this.notificationsService.findAllForUser(user.id, query);
   }
 
   /**
@@ -83,9 +78,7 @@ export class NotificationsController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async markAllAsRead(
-    @CurrentUser() user: { id: string },
-  ) {
+  async markAllAsRead(@CurrentUser() user: { id: string }) {
     return this.notificationsService.markAllAsRead(user.id);
   }
 

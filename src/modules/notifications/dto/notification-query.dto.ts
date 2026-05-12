@@ -1,11 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsOptional,
-  IsBoolean,
-  IsInt,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsOptional, IsBoolean, IsInt, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class NotificationQueryDto {
@@ -35,10 +29,11 @@ export class NotificationQueryDto {
     description: 'Filter by read status. Omit to return all.',
   })
   @IsOptional()
-  @Transform(({ value }) => {
+  @Transform(({ value }): boolean | undefined => {
+    if (value === undefined) return undefined;
     if (value === 'true') return true;
     if (value === 'false') return false;
-    return value;
+    return undefined;
   })
   @IsBoolean()
   isRead?: boolean;

@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from '../entities/notification.entity';
@@ -27,9 +24,7 @@ export class NotificationsAction {
     });
 
     if (!notification) {
-      throw new NotFoundException(
-        `Notification not found`,
-      );
+      throw new NotFoundException(`Notification not found`);
     }
 
     return notification;
@@ -58,10 +53,7 @@ export class NotificationsAction {
         isRead: true,
         readAt: new Date(),
       })
-      .where(
-        'user_id = :userId AND is_read = false',
-        { userId },
-      )
+      .where('user_id = :userId AND is_read = false', { userId })
       .execute();
   }
 }

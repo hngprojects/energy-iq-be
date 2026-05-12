@@ -38,14 +38,10 @@ export class NotificationsService {
 
     // Only apply isRead filter if explicitly provided
     if (isRead !== undefined) {
-      queryBuilder.andWhere(
-        'notification.is_read = :isRead',
-        { isRead },
-      );
+      queryBuilder.andWhere('notification.is_read = :isRead', { isRead });
     }
 
-    const [notifications, total] =
-      await queryBuilder.getManyAndCount();
+    const [notifications, total] = await queryBuilder.getManyAndCount();
 
     return {
       data: notifications.map((n) => this.toPublicNotification(n)),
@@ -64,23 +60,18 @@ export class NotificationsService {
    * Idempotent — calling this on an already-read notification
    * returns the current state without changing readAt.
    */
-  async markOneAsRead(
-    id: string,
-    userId: string,
-  ): Promise<PublicNotification> {
-    const notification =
-      await this.notificationsAction.findOneByIdAndUserId(
-        id,
-        userId,
-      );
+  async markOneAsRead(id: string, userId: string): Promise<PublicNotification> {
+    const notification = await this.notificationsAction.findOneByIdAndUserId(
+      id,
+      userId,
+    );
 
     // Idempotency check — do not update readAt if already read
     if (notification.isRead) {
       return this.toPublicNotification(notification);
     }
 
-    const updated =
-      await this.notificationsAction.markAsRead(notification);
+    const updated = await this.notificationsAction.markAsRead(notification);
 
     return this.toPublicNotification(updated);
   }
@@ -89,9 +80,7 @@ export class NotificationsService {
    * Mark all unread notifications as read for a user.
    * Single database query regardless of notification count.
    */
-  async markAllAsRead(
-    userId: string,
-  ): Promise<{ updated: boolean }> {
+  async markAllAsRead(userId: string): Promise<{ updated: boolean }> {
     await this.notificationsAction.markAllAsRead(userId);
     return { updated: true };
   }
@@ -100,9 +89,7 @@ export class NotificationsService {
    * Convert internal entity to public-facing object.
    * Never expose more fields than necessary.
    */
-  private toPublicNotification(
-    notification: Notification,
-  ): PublicNotification {
+  private toPublicNotification(notification: Notification): PublicNotification {
     return {
       id: notification.id,
       title: notification.title,
