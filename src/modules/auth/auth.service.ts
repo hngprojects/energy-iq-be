@@ -111,6 +111,7 @@ export class AuthService {
     await this.redis.delete(attemptKey, 'otp_attempts');
 
     user.emailVerified = true;
+    await this.sendWelcomeEmail(user);
     return this.issueTokens(user);
   }
 
@@ -301,6 +302,14 @@ export class AuthService {
       user.email,
       `${user.firstName} ${user.lastName}`,
       otp,
+      this.appCfg.clientUrl,
+    );
+  }
+
+  private async sendWelcomeEmail(user: User): Promise<void> {
+    return this.emailService.sendWelcome(
+      user.email,
+      `${user.firstName} ${user.lastName}`,
       this.appCfg.clientUrl,
     );
   }
