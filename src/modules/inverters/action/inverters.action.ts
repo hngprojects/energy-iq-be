@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Inverter } from '../entities/inverters.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { InverterApiType, InverterBrand } from '../../../common/enums';
 
 @Injectable()
 export class InverterModelAction extends AbstractModelAction<Inverter> {
@@ -29,7 +30,15 @@ export class InverterModelAction extends AbstractModelAction<Inverter> {
     return this.repository.find({ where: { userId, isActive: true } });
   }
 
-  async;
+  async findAllVictron(): Promise<Inverter[]> {
+    return this.repository.find({
+      where: {
+        isActive: true,
+        apiType: InverterApiType.LIVE_API,
+        brand: InverterBrand.VICTRON,
+      },
+    });
+  }
 
   async deactivateById(id: string): Promise<void> {
     await this.repository.update({ id }, { isActive: false });
