@@ -44,6 +44,22 @@ interface VictronExtendedAttribute {
   }>;
 }
 
+interface VictronDiagnosticAttribute {
+  idDataAttribute: number;
+  code: string;
+  description: string;
+  formatWithUnit: string;
+  dataType: string;
+  rawValue: string;
+  formattedValue: string;
+  timestamp?: string;
+}
+
+export interface VictronDiagnosticsResponse {
+  success: boolean;
+  records: VictronDiagnosticAttribute[];
+}
+
 export interface VictronInstallation {
   idSite: number;
   accessLevel: number;
@@ -92,14 +108,22 @@ export interface VictronInstallationsResponse {
   records: VictronInstallation[];
 }
 
-export interface NormalizedMetric {
-  solarInputKw: number | null;
-  batteryLevel: number | null;
-  realTimePowerOutputKw: number | null;
-  loadRatingKw: number | null;
-  dcVoltage: number | null;
-  acVoltage: number | null;
-  mpptEfficiency: number | null;
+export interface NormalisedMetric {
+  // required
+  inverterId: string;
+  recordedAt: string; // should be an ISO 8601 UTC
+  batterySoc: number;
+  solarPowerKw: number;
+  acOutputPowerKw: number; // kilowatts
+  gridVoltageV: number; // volts
+  gridFrequencyHz: number;
+  inverterStatus: string;
+  // optional - might not be provided by API
+  batteryVoltageV: number | null;
+  batteryCurrentA: number | null;
+  batteryTemperatureC: number | null;
+  batteryTimeToGoMin: number | null;
+  inverterTemperatureC: number | null;
 }
 
 export interface VerifiedSystem {
